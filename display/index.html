@@ -491,15 +491,16 @@
             encodeURIComponent(notice.id);
 
 
-        new QRCode(
-            qrContainer,
-            {
-                text: noticeURL,
-                width: 118,
-                height: 118,
-                correctLevel: QRCode.CorrectLevel.M
-            }
-        );
+        new window.QRCode(
+        qrContainer,
+    {
+        text: noticeURL,
+        width: 118,
+        height: 118,
+        correctLevel: window.QRCode.CorrectLevel.M
+    }
+);
+        
 
 
         qrContainer.style.display = "block";
