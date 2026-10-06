@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notice Board</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f4f6f8;
+      color: #1f2937;
+    }
+
+    .page {
+      max-width: 900px;
+      margin: 40px auto;
+      padding: 0 20px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 32px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+    }
+
+    .brand {
+      font-size: 14px;
+      font-weight: 700;
+      color: #2563eb;
+      letter-spacing: 0.5px;
+      margin-bottom: 20px;
+    }
+
+    .priority {
+      display: inline-block;
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 14px;
+    }
+
+    .priority-normal {
+      background: #dbeafe;
+      color: #1d4ed8;
+    }
+
+    .priority-high {
+      background: #fee2e2;
+      color: #b91c1c;
+    }
+
+    .priority-urgent {
+      background: #7f1d1d;
+      color: white;
+    }
+
+    h1 {
+      margin: 0 0 18px;
+      font-size: 34px;
+      line-height: 1.2;
+      color: #111827;
+    }
+
+    .description {
+      font-size: 17px;
+      line-height: 1.7;
+      white-space: pre-wrap;
+      margin-bottom: 28px;
+    }
+
+    .meta {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 14px;
+      margin-bottom: 26px;
+    }
+
+    .meta-item {
+      background: #f8fafc;
+      border-radius: 10px;
+      padding: 14px;
+    }
+
+    .meta-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      color: #64748b;
+      text-transform: uppercase;
+      margin-bottom: 5px;
+    }
+
+    .meta-value {
+      font-size: 15px;
+      color: #1e293b;
+    }
+
+    .validity {
+      font-size: 13px;
+      color: #64748b;
+      border-top: 1px solid #e5e7eb;
+      padding-top: 18px;
+      margin-bottom: 24px;
+    }
+
+    .resources {
+      border-top: 1px solid #e5e7eb;
+      padding-top: 22px;
+    }
+
+    .resources h2 {
+      font-size: 20px;
+      margin: 0 0 14px;
+    }
+
+    .resource {
+      display: block;
+      padding: 12px 14px;
+      margin-bottom: 10px;
+      border-radius: 9px;
+      background: #eff6ff;
+      color: #1d4ed8;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .resource:hover {
+      background: #dbeafe;
+    }
+
+    .status {
+      text-align: center;
+      padding: 70px 20px;
+    }
+
+    .status h1 {
+      font-size: 28px;
+    }
+
+    .status p {
+      color: #64748b;
+      line-height: 1.6;
+    }
+
+    .expired {
+      background: #fff7ed;
+      color: #c2410c;
+      border-radius: 8px;
+      padding: 12px 14px;
+      margin-bottom: 22px;
+      font-weight: 600;
+    }
+
+    .footer {
+      text-align: center;
+      color: #94a3b8;
+      font-size: 12px;
+      margin-top: 20px;
+    }
+
+    @media (max-width: 600px) {
+      .page {
+        margin: 20px auto;
+      }
+
+      .card {
+        padding: 22px;
+      }
+
+      h1 {
+        font-size: 27px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="page">
+    <div id="app">
+      <div class="status">
+        <h1>Loading notice...</h1>
+        <p>Please wait.</p>
+      </div>
+    </div>
+
+    <div class="footer">
+      Smart Notice Board
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from
+      "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+
+    import {
+      getDatabase,
+      ref,
+      get
+    } from
+      "https://www.gstatic.com/firebasejs/12.7.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCkwCE5YYeo8rDk1mPTbwqUtWDe_8iIP3E",
+      authDomain: "noticeboard-c1ed5.firebaseapp.com",
+      databaseURL: "https://noticeboard-c1ed5-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "noticeboard-c1ed5",
+      storageBucket: "noticeboard-c1ed5.firebasestorage.app",
+      messagingSenderId: "713125740332",
+      appId: "1:713125740332:web:59ce44829c2a749688b689",
+      measurementId: "G-HZXBZY8DCG"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const appContainer = document.getElementById("app");
+
+    function escapeHTML(value) {
+      const div = document.createElement("div");
+      div.textContent = value ?? "";
+      return div.innerHTML;
+    }
+
+    function formatDate(value) {
+      if (!value) return "";
+
+      const date = new Date(value);
+
+      if (Number.isNaN(date.getTime())) {
+        return value;
+      }
+
+      return date.toLocaleString("en-IN", {
+        dateStyle: "medium",
+        timeStyle: "short"
+      });
+    }
+
+    function getNoticeId() {
+      const parts = window.location.pathname
+        .split("/")
+        .filter(Boolean);
+
+      const noticeIndex = parts.indexOf("notice");
+
+      if (noticeIndex !== -1 && parts[noticeIndex + 1]) {
+        return decodeURIComponent(parts[noticeIndex + 1]);
+      }
+
+      return null;
+    }
+
+    function showStatus(title, message) {
+      appContainer.innerHTML = `
+        <div class="card status">
+          <h1>${escapeHTML(title)}</h1>
+          <p>${escapeHTML(message)}</p>
+        </div>
+      `;
+    }
+
+    function renderNotice(notice) {
+      const priority = String(notice.priority || "NORMAL").toUpperCase();
+
+      let priorityClass = "priority-normal";
+
+      if (priority === "HIGH") {
+        priorityClass = "priority-high";
+      } else if (priority === "URGENT") {
+        priorityClass = "priority-urgent";
+      }
+
+      const now = Date.now();
+      const endTime = notice.endTime
+        ? new Date(notice.endTime).getTime()
+        : null;
+
+      const expired =
+        endTime !== null &&
+        !Number.isNaN(endTime) &&
+        now >= endTime;
+
+      const eventMeta = [];
+
+      if (notice.eventDate) {
+        eventMeta.push(`
+          <div class="meta-item">
+            <span class="meta-label">Event Date</span>
+            <span class="meta-value">${escapeHTML(notice.eventDate)}</span>
+          </div>
+        `);
+      }
+
+      if (notice.eventTime) {
+        eventMeta.push(`
+          <div class="meta-item">
+            <span class="meta-label">Event Time</span>
+            <span class="meta-value">${escapeHTML(notice.eventTime)}</span>
+          </div>
+        `);
+      }
+
+      if (notice.venue) {
+        eventMeta.push(`
+          <div class="meta-item">
+            <span class="meta-label">Venue</span>
+            <span class="meta-value">${escapeHTML(notice.venue)}</span>
+          </div>
+        `);
+      }
+
+      const resources = Array.isArray(notice.resources)
+        ? notice.resources
+        : [];
+
+      const validResources = resources.filter(
+        resource => resource && resource.url
+      );
+
+      const resourcesHTML = validResources.length > 0
+        ? `
+          <div class="resources">
+            <h2>Resources</h2>
+            ${validResources.map(resource => `
+              <a
+                class="resource"
+                href="${escapeHTML(resource.url)}"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                ${escapeHTML(resource.label || resource.title || resource.url)}
+              </a>
+            `).join("")}
+          </div>
+        `
+        : "";
+
+      appContainer.innerHTML = `
+        <div class="card">
+          <div class="brand">SMART NOTICE BOARD</div>
+
+          <div class="priority ${priorityClass}">
+            ${escapeHTML(priority)}
+          </div>
+
+          <h1>${escapeHTML(notice.title || "Untitled Notice")}</h1>
+
+          ${
+            expired
+              ? `<div class="expired">This notice has expired.</div>`
+              : ""
+          }
+
+          <div class="description">
+            ${escapeHTML(notice.description || "")}
+          </div>
+
+          ${
+            eventMeta.length > 0
+              ? `<div class="meta">${eventMeta.join("")}</div>`
+              : ""
+          }
+
+          <div class="validity">
+            Valid from <strong>${escapeHTML(formatDate(notice.startTime))}</strong>
+            to <strong>${escapeHTML(formatDate(notice.endTime))}</strong>
+          </div>
+
+          ${resourcesHTML}
+        </div>
+      `;
+    }
+
+    async function loadNotice() {
+      const noticeId = getNoticeId();
+
+      if (!noticeId) {
+        showStatus(
+          "Notice not found",
+          "This page must be opened using a valid notice QR code."
+        );
+        return;
+      }
+
+      try {
+        const noticeRef = ref(db, `notices/${noticeId}`);
+        const snapshot = await get(noticeRef);
+
+        if (!snapshot.exists()) {
+          showStatus(
+            "Notice not found",
+            "The requested notice does not exist or may have been removed."
+          );
+          return;
+        }
+
+        renderNotice(snapshot.val());
+
+      } catch (error) {
+        console.error("Failed to load notice:", error);
+
+        showStatus(
+          "Unable to load notice",
+          "Please check your internet connection and try again."
+        );
+      }
+    }
+
+    loadNotice();
+  </script>
+</body>
+</html>

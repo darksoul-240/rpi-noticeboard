@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/notice/:id",
+      "destination": "/index.html"
+    }
+  ]
+}
