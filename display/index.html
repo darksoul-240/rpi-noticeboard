@@ -36,3 +36,727 @@
             overflow: hidden;
 
         }
+
+
+        header {
+
+            height: 90px;
+
+            background: #111827;
+
+            color: white;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            font-size: 34px;
+
+            font-weight: bold;
+
+            letter-spacing: 2px;
+
+        }
+
+
+        .content {
+
+            height: 510px;
+
+            padding: 40px 60px;
+
+        }
+
+
+        .priority {
+
+            display: inline-block;
+
+            background: #2563eb;
+
+            color: white;
+
+            padding: 8px 18px;
+
+            border-radius: 6px;
+
+            font-size: 18px;
+
+            font-weight: bold;
+
+            margin-bottom: 20px;
+
+        }
+
+
+        .priority.HIGH {
+            background: #dc2626;
+        }
+
+
+        .priority.URGENT {
+            background: #991b1b;
+        }
+
+
+        .priority.NORMAL {
+            background: #2563eb;
+        }
+
+
+        h1 {
+
+            font-size: 42px;
+
+            margin-bottom: 25px;
+
+        }
+
+
+        .meta {
+
+            font-size: 22px;
+
+            line-height: 1.7;
+
+            margin-bottom: 25px;
+
+        }
+
+
+        .description {
+
+            font-size: 24px;
+
+            line-height: 1.5;
+
+        }
+
+
+        #loading {
+
+            font-size: 28px;
+
+            text-align: center;
+
+            margin-top: 150px;
+
+        }
+
+
+        #error {
+
+            display: none;
+
+            font-size: 32px;
+
+            font-weight: bold;
+
+            text-align: center;
+
+            margin-top: 150px;
+
+            color: #6b7280;
+
+        }
+
+
+        #rotation {
+
+            position: absolute;
+
+            right: 30px;
+
+            bottom: 20px;
+
+            font-size: 16px;
+
+            color: #6b7280;
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<header>
+
+    SMART NOTICE BOARD
+
+</header>
+
+
+<div id="loading">
+
+    Loading notices...
+
+</div>
+
+
+<div id="error">
+
+    NO ACTIVE NOTICES
+
+</div>
+
+
+<div
+    class="content"
+    id="notice"
+    style="display: none;"
+>
+
+
+    <div
+        id="priority"
+        class="priority"
+    >
+
+        NORMAL PRIORITY
+
+    </div>
+
+
+    <h1 id="title"></h1>
+
+
+    <div class="meta">
+
+        <div>
+
+            <strong>Date:</strong>
+
+            <span id="date"></span>
+
+        </div>
+
+
+        <div>
+
+            <strong>Time:</strong>
+
+            <span id="time"></span>
+
+        </div>
+
+
+        <div>
+
+            <strong>Venue:</strong>
+
+            <span id="venue"></span>
+
+        </div>
+
+    </div>
+
+
+    <div
+        class="description"
+        id="description"
+    ></div>
+
+
+</div>
+
+
+<div id="rotation"></div>
+
+
+<script type="module">
+
+
+    // --------------------------------------------------
+    // FIREBASE
+    // --------------------------------------------------
+
+    import {
+        initializeApp
+    }
+    from
+        "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+
+
+    import {
+        getDatabase,
+        ref,
+        onValue
+    }
+    from
+        "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+
+
+    const firebaseConfig = {
+
+        apiKey:
+            "AIzaSyCkwCE5YYeo8rDk1mPTbwqUtWDe_8iIP3E",
+
+        authDomain:
+            "noticeboard-c1ed5.firebaseapp.com",
+
+        databaseURL:
+            "https://noticeboard-c1ed5-default-rtdb.asia-southeast1.firebasedatabase.app",
+
+        projectId:
+            "noticeboard-c1ed5",
+
+        storageBucket:
+            "noticeboard-c1ed5.firebasestorage.app",
+
+        messagingSenderId:
+            "713125740332",
+
+        appId:
+            "1:713125740332:web:59ce44829c2a749688b689",
+
+        measurementId:
+            "G-HZXBZY8DCG"
+
+    };
+
+
+    const app =
+        initializeApp(firebaseConfig);
+
+
+    const db =
+        getDatabase(app);
+
+
+    const noticesRef =
+        ref(db, "notices");
+
+
+    // --------------------------------------------------
+    // NOTICE STATE
+    // --------------------------------------------------
+
+    let allNotices = [];
+
+    let activeNotices = [];
+
+    let currentIndex = 0;
+
+    let firebaseLoaded = false;
+
+
+    // --------------------------------------------------
+    // GET ACTIVE NOTICES
+    // --------------------------------------------------
+
+    function getActiveNotices() {
+
+        const now =
+            new Date();
+
+
+        return allNotices.filter(
+            notice => {
+
+                if (
+                    !notice.startTime ||
+                    !notice.endTime
+                ) {
+
+                    return false;
+
+                }
+
+
+                const start =
+                    new Date(
+                        notice.startTime
+                    );
+
+
+                const end =
+                    new Date(
+                        notice.endTime
+                    );
+
+
+                return (
+                    now >= start &&
+                    now < end
+                );
+
+            }
+        );
+
+    }
+
+
+    // --------------------------------------------------
+    // DISPLAY NOTICE
+    // --------------------------------------------------
+
+    function displayNotice(notice) {
+
+
+        if (!notice) {
+
+            document.getElementById("notice")
+                .style.display = "none";
+
+            document.getElementById("error")
+                .style.display = "block";
+
+            document.getElementById("error")
+                .textContent =
+                "NO ACTIVE NOTICES";
+
+            document.getElementById("rotation")
+                .textContent = "";
+
+            return;
+
+        }
+
+
+        document.getElementById("loading")
+            .style.display = "none";
+
+
+        document.getElementById("error")
+            .style.display = "none";
+
+
+        document.getElementById("notice")
+            .style.display = "block";
+
+
+        // Title
+
+        document.getElementById("title")
+            .textContent =
+            notice.title || "";
+
+
+        // Description
+
+        document.getElementById("description")
+            .textContent =
+            notice.description || "";
+
+
+        // Date
+
+        document.getElementById("date")
+            .textContent =
+            notice.date || "";
+
+
+        // Time
+
+        document.getElementById("time")
+            .textContent =
+            notice.time || "";
+
+
+        // Venue
+
+        document.getElementById("venue")
+            .textContent =
+            notice.venue || "";
+
+
+        // Priority
+
+        const priority =
+            notice.priority || "NORMAL";
+
+
+        const priorityElement =
+            document.getElementById("priority");
+
+
+        priorityElement.textContent =
+            priority + " PRIORITY";
+
+
+        priorityElement.className =
+            "priority " + priority;
+
+
+        // Rotation indicator
+
+        if (activeNotices.length > 1) {
+
+            document.getElementById("rotation")
+                .textContent =
+                (currentIndex + 1) +
+                " / " +
+                activeNotices.length;
+
+        }
+        else {
+
+            document.getElementById("rotation")
+                .textContent = "";
+
+        }
+
+    }
+
+
+    // --------------------------------------------------
+    // REFRESH ACTIVE NOTICE LIST
+    // --------------------------------------------------
+
+    function refreshActiveNotices() {
+
+
+        const newActiveNotices =
+            getActiveNotices();
+
+
+        // Sort newest first
+
+        newActiveNotices.sort(
+            (a, b) =>
+                (b.createdAt || 0) -
+                (a.createdAt || 0)
+        );
+
+
+        // Check whether the currently displayed
+        // notice still exists in the active list
+
+        const currentNotice =
+            activeNotices[currentIndex];
+
+
+        let newIndex = 0;
+
+
+        if (currentNotice) {
+
+            const foundIndex =
+                newActiveNotices.findIndex(
+                    notice =>
+                        notice.id ===
+                        currentNotice.id
+                );
+
+
+            if (foundIndex !== -1) {
+
+                newIndex =
+                    foundIndex;
+
+            }
+
+        }
+
+
+        activeNotices =
+            newActiveNotices;
+
+
+        // No active notices
+
+        if (
+            activeNotices.length === 0
+        ) {
+
+            currentIndex = 0;
+
+            displayNotice(null);
+
+            return;
+
+        }
+
+
+        // Make sure index is valid
+
+        currentIndex =
+            Math.min(
+                newIndex,
+                activeNotices.length - 1
+            );
+
+
+        displayNotice(
+            activeNotices[currentIndex]
+        );
+
+    }
+
+
+    // --------------------------------------------------
+    // FIREBASE REALTIME LISTENER
+    // --------------------------------------------------
+
+    onValue(
+
+        noticesRef,
+
+
+        (snapshot) => {
+
+
+            const data =
+                snapshot.val();
+
+
+            if (!data) {
+
+                allNotices = [];
+
+                firebaseLoaded = true;
+
+                refreshActiveNotices();
+
+                return;
+
+            }
+
+
+            allNotices =
+
+                Object.entries(data)
+
+                    .map(
+                        ([id, notice]) => ({
+
+                            id,
+
+                            ...notice
+
+                        })
+                    );
+
+
+            firebaseLoaded = true;
+
+
+            // Immediately reevaluate
+
+            refreshActiveNotices();
+
+        },
+
+
+        (error) => {
+
+
+            console.error(error);
+
+
+            firebaseLoaded = false;
+
+
+            document.getElementById("loading")
+                .style.display = "none";
+
+
+            document.getElementById("notice")
+                .style.display = "none";
+
+
+            document.getElementById("error")
+                .style.display = "block";
+
+
+            document.getElementById("error")
+                .textContent =
+                "Firebase ERROR: " +
+                error.code +
+                " | " +
+                error.message;
+
+        }
+
+    );
+
+
+    // --------------------------------------------------
+    // VALIDITY CHECK
+    //
+    // Runs every 5 seconds.
+    //
+    // This handles notices becoming active
+    // or expiring without Firebase changing.
+    // --------------------------------------------------
+
+    setInterval(
+
+        () => {
+
+            if (firebaseLoaded) {
+
+                refreshActiveNotices();
+
+            }
+
+        },
+
+        5000
+
+    );
+
+
+    // --------------------------------------------------
+    // NOTICE ROTATION
+    //
+    // Changes notice every 20 seconds.
+    // Only rotates when there is more than
+    // one active notice.
+    // --------------------------------------------------
+
+    setInterval(
+
+        () => {
+
+
+            if (
+                activeNotices.length <= 1
+            ) {
+
+                return;
+
+            }
+
+
+            // Move to next notice
+
+            currentIndex++;
+
+
+            // Loop back to beginning
+
+            if (
+                currentIndex >=
+                activeNotices.length
+            ) {
+
+                currentIndex = 0;
+
+            }
+
+
+            displayNotice(
+                activeNotices[currentIndex]
+            );
+
+
+        },
+
+        20000
+
+    );
+
+
+</script>
+
+
+</body>
+
+</html>
