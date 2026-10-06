@@ -1,0 +1,1315 @@
+<!doctype html>
+
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Smart Notice Board — Admin</title>
+
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+
+        padding: 30px;
+
+        font-family: Arial, sans-serif;
+
+        background: #f3f4f6;
+
+        color: #111827;
+      }
+
+      .container {
+        max-width: 1100px;
+
+        margin: auto;
+      }
+
+      .header {
+        display: flex;
+
+        justify-content: space-between;
+
+        align-items: center;
+
+        margin-bottom: 25px;
+      }
+
+      .header h1 {
+        margin: 0;
+
+        font-size: 30px;
+      }
+
+      .header p {
+        margin-top: 6px;
+
+        color: #6b7280;
+      }
+
+      .card {
+        background: white;
+
+        border-radius: 12px;
+
+        padding: 25px;
+
+        margin-bottom: 25px;
+
+        box-shadow: 0 3px 15px rgba(0, 0, 0, 0.08);
+      }
+
+      .card h2 {
+        margin-top: 0;
+      }
+
+      .grid {
+        display: grid;
+
+        grid-template-columns: repeat(2, 1fr);
+
+        gap: 18px;
+      }
+
+      .full {
+        grid-column: 1 / -1;
+      }
+
+      label {
+        display: block;
+
+        font-weight: bold;
+
+        margin-bottom: 6px;
+      }
+
+      input,
+      textarea,
+      select {
+        width: 100%;
+
+        padding: 11px;
+
+        border: 1px solid #d1d5db;
+
+        border-radius: 7px;
+
+        font-size: 15px;
+
+        font-family: inherit;
+      }
+
+      textarea {
+        min-height: 100px;
+
+        resize: vertical;
+      }
+
+      input:focus,
+      textarea:focus,
+      select:focus {
+        outline: none;
+
+        border-color: #2563eb;
+      }
+
+      .validity {
+        background: #f9fafb;
+
+        padding: 18px;
+
+        border-radius: 8px;
+
+        border: 1px solid #e5e7eb;
+      }
+
+      .validity-grid {
+        display: grid;
+
+        grid-template-columns: 1fr 1fr;
+
+        gap: 15px;
+      }
+
+      button {
+        border: none;
+
+        border-radius: 7px;
+
+        padding: 11px 18px;
+
+        font-size: 15px;
+
+        font-weight: bold;
+
+        cursor: pointer;
+      }
+
+      .primary {
+        background: #2563eb;
+
+        color: white;
+      }
+
+      .primary:hover {
+        background: #1d4ed8;
+      }
+
+      .secondary {
+        background: #e5e7eb;
+
+        color: #111827;
+      }
+
+      .secondary:hover {
+        background: #d1d5db;
+      }
+
+      .danger {
+        background: #dc2626;
+
+        color: white;
+      }
+
+      .danger:hover {
+        background: #b91c1c;
+      }
+
+      .button-row {
+        display: flex;
+
+        gap: 10px;
+
+        margin-top: 20px;
+      }
+
+      #status {
+        display: none;
+
+        padding: 12px;
+
+        border-radius: 7px;
+
+        margin-bottom: 20px;
+
+        font-weight: bold;
+      }
+
+      .section {
+        margin-top: 30px;
+      }
+
+      .section-header {
+        display: flex;
+
+        align-items: center;
+
+        gap: 10px;
+
+        margin-bottom: 12px;
+      }
+
+      .section-header h2 {
+        margin: 0;
+      }
+
+      .count {
+        background: #e5e7eb;
+
+        padding: 4px 9px;
+
+        border-radius: 20px;
+
+        font-size: 13px;
+
+        font-weight: bold;
+      }
+
+      .notice-list {
+        display: flex;
+
+        flex-direction: column;
+
+        gap: 12px;
+      }
+
+      .notice-card {
+        background: white;
+
+        border-radius: 10px;
+
+        padding: 18px;
+
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+      }
+
+      .notice-top {
+        display: flex;
+
+        justify-content: space-between;
+
+        align-items: flex-start;
+
+        gap: 15px;
+      }
+
+      .notice-title {
+        font-size: 19px;
+
+        font-weight: bold;
+      }
+
+      .notice-description {
+        margin-top: 7px;
+
+        color: #4b5563;
+
+        line-height: 1.5;
+      }
+
+      .notice-meta {
+        margin-top: 12px;
+
+        color: #6b7280;
+
+        font-size: 14px;
+
+        line-height: 1.7;
+      }
+
+      .priority {
+        display: inline-block;
+
+        padding: 5px 9px;
+
+        border-radius: 5px;
+
+        font-size: 12px;
+
+        font-weight: bold;
+
+        color: white;
+      }
+
+      .priority.NORMAL {
+        background: #2563eb;
+      }
+
+      .priority.HIGH {
+        background: #dc2626;
+      }
+
+      .priority.URGENT {
+        background: #991b1b;
+      }
+
+      .notice-actions {
+        display: flex;
+
+        gap: 8px;
+
+        margin-top: 15px;
+      }
+
+      .empty {
+        background: white;
+
+        padding: 20px;
+
+        border-radius: 10px;
+
+        color: #6b7280;
+
+        text-align: center;
+      }
+
+      /* -----------------------------
+
+                 RESPONSIVE
+
+              ----------------------------- */
+
+      @media (max-width: 700px) {
+        body {
+          padding: 15px;
+        }
+
+        .grid {
+          grid-template-columns: 1fr;
+        }
+
+        .full {
+          grid-column: auto;
+        }
+
+        .validity-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .header {
+          flex-direction: column;
+
+          align-items: flex-start;
+
+          gap: 10px;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div
+      id="loginScreen"
+      style="
+        display: flex;
+
+        min-height: 80vh;
+
+        align-items: center;
+
+        justify-content: center;
+      "
+    >
+      <div class="card" style="max-width: 460px; width: 100%">
+        <h2>Admin Login</h2>
+
+        <p style="color: #6b7280; margin: 8px 0 20px">
+          Sign in to manage notices.
+        </p>
+
+        <form id="loginForm">
+          <div style="margin-bottom: 15px">
+            <label for="loginEmail">Email</label
+            ><input
+              type="email"
+              id="loginEmail"
+              required
+              autocomplete="username"
+            />
+          </div>
+
+          <div style="margin-bottom: 15px">
+            <label for="loginPassword">Password</label
+            ><input
+              type="password"
+              id="loginPassword"
+              required
+              autocomplete="current-password"
+            />
+          </div>
+
+          <button type="submit" class="primary" style="width: 100%">
+            Sign In
+          </button>
+
+          <div
+            id="loginStatus"
+            style="
+              display: none;
+
+              margin-top: 15px;
+
+              padding: 12px;
+
+              border-radius: 7px;
+            "
+          ></div>
+        </form>
+      </div>
+    </div>
+
+    <div id="adminApp" style="display: none">
+      <div class="container">
+        <!-- HEADER -->
+
+        <div class="header">
+          <div>
+            <h1>Smart Notice Board</h1>
+
+            <p>Notice Management Dashboard</p>
+
+            <div
+              id="authBar"
+              style="display: none; text-align: right; margin-top: 10px"
+            >
+              <span
+                id="userEmail"
+                style="margin-right: 12px; color: #4b5563"
+              ></span>
+
+              <button type="button" class="secondary" id="logoutButton">
+                Logout
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- STATUS -->
+
+        <div id="status"></div>
+
+        <!-- CREATE / EDIT FORM -->
+
+        <div class="card">
+          <h2 id="formTitle">Create New Notice</h2>
+
+          <form id="noticeForm">
+            <div class="grid">
+              <!-- TITLE -->
+
+              <div class="full">
+                <label>
+                  Title
+                  <span class="optional-label" style="color: #991b1b"
+                    >(Required)</span
+                  >
+                </label>
+
+                <input type="text" id="title" required />
+              </div>
+
+              <!-- DESCRIPTION -->
+
+              <div class="full">
+                <label>
+                  Description
+                  <span class="optional-label" style="color: #991b1b"
+                    >(Required)</span
+                  >
+                </label>
+
+                <textarea id="description" required></textarea>
+              </div>
+
+              <!-- DATE -->
+
+              <div>
+                <label>
+                  Event Date <span class="optional-label">(Optional)</span>
+                </label>
+
+                <input type="date" id="date" />
+              </div>
+
+              <!-- TIME -->
+
+              <div>
+                <label>
+                  Event Time <span class="optional-label">(Optional)</span>
+                </label>
+
+                <input type="time" id="time" />
+              </div>
+
+              <!-- VENUE -->
+
+              <div>
+                <label>
+                  Venue <span class="optional-label">(Optional)</span>
+                </label>
+
+                <input type="text" id="venue" />
+              </div>
+
+              <!-- PRIORITY -->
+
+              <div>
+                <label> Priority </label>
+
+                <select id="priority">
+                  <option value="NORMAL">NORMAL</option>
+
+                  <option value="HIGH">HIGH</option>
+
+                  <option value="URGENT">URGENT</option>
+                </select>
+              </div>
+
+              <!-- VALIDITY -->
+
+              <div class="full">
+                <div class="validity">
+                  <label> Validity Period </label>
+
+                  <div class="validity-grid">
+                    <div>
+                      <label>
+                        Valid From
+                        <span class="optional-label" style="color: #991b1b"
+                          >(Required)</span
+                        >
+                      </label>
+
+                      <input type="datetime-local" id="startTime" required />
+                    </div>
+
+                    <div>
+                      <label>
+                        Valid Until
+                        <span class="optional-label" style="color: #991b1b"
+                          >(Required)</span
+                        >
+                      </label>
+
+                      <input type="datetime-local" id="endTime" required />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- RESOURCES -->
+            <div class="full">
+              <div class="resources-section">
+                <label
+                  >Resources
+                  <span class="optional-label">(Optional)</span></label
+                >
+                <div
+                  style="color: #6b7280; font-size: 14px; margin-bottom: 12px"
+                >
+                  Add useful links such as registration forms, brochures,
+                  schedules, or other resources.
+                </div>
+                <div id="resourcesContainer"></div>
+                <button type="button" class="secondary" id="addResourceButton">
+                  + Add Resource
+                </button>
+              </div>
+            </div>
+
+            <!-- BUTTONS -->
+
+            <div class="button-row">
+              <button type="submit" class="primary" id="submitButton">
+                Publish Notice
+              </button>
+
+              <button
+                type="button"
+                class="secondary"
+                id="cancelButton"
+                style="display: none"
+              >
+                Cancel Edit
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- ACTIVE -->
+
+        <div class="section">
+          <div class="section-header">
+            <h2>Active</h2>
+
+            <span class="count" id="activeCount"> 0 </span>
+          </div>
+
+          <div class="notice-list" id="activeList"></div>
+        </div>
+
+        <!-- UPCOMING -->
+
+        <div class="section">
+          <div class="section-header">
+            <h2>Upcoming</h2>
+
+            <span class="count" id="upcomingCount"> 0 </span>
+          </div>
+
+          <div class="notice-list" id="upcomingList"></div>
+        </div>
+
+        <!-- EXPIRED -->
+
+        <div class="section">
+          <div class="section-header">
+            <h2>Expired</h2>
+
+            <span class="count" id="expiredCount"> 0 </span>
+          </div>
+
+          <div class="notice-list" id="expiredList"></div>
+        </div>
+      </div>
+    </div>
+
+    <script type="module">
+      // --------------------------------------------------
+
+      // FIREBASE
+
+      // --------------------------------------------------
+
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+
+      import {
+        getDatabase,
+        ref,
+        push,
+        set,
+        update,
+        remove,
+        onValue,
+      } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+
+      import {
+        getAuth,
+        signInWithEmailAndPassword,
+        onAuthStateChanged,
+        signOut,
+      } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyCkwCE5YYeo8rDk1mPTbwqUtWDe_8iIP3E",
+
+        authDomain: "noticeboard-c1ed5.firebaseapp.com",
+
+        databaseURL:
+          "https://noticeboard-c1ed5-default-rtdb.asia-southeast1.firebasedatabase.app",
+
+        projectId: "noticeboard-c1ed5",
+
+        storageBucket: "noticeboard-c1ed5.firebasestorage.app",
+
+        messagingSenderId: "713125740332",
+
+        appId: "1:713125740332:web:59ce44829c2a749688b689",
+
+        measurementId: "G-HZXBZY8DCG",
+      };
+
+      const app = initializeApp(firebaseConfig);
+
+      const db = getDatabase(app);
+
+      const auth = getAuth(app);
+
+      const noticesRef = ref(db, "notices"); // --------------------------------------------------
+      // AUTHENTICATION
+      // --------------------------------------------------
+
+      const loginScreen = document.getElementById("loginScreen");
+
+      const adminApp = document.getElementById("adminApp");
+
+      const authBar = document.getElementById("authBar");
+
+      const userEmail = document.getElementById("userEmail");
+
+      const loginForm = document.getElementById("loginForm");
+
+      const loginStatus = document.getElementById("loginStatus");
+
+      const logoutButton = document.getElementById("logoutButton");
+
+      function showLoginStatus(message) {
+        loginStatus.textContent = message;
+
+        loginStatus.style.display = "block";
+
+        loginStatus.style.background = "#fee2e2";
+
+        loginStatus.style.color = "#991b1b";
+      }
+
+      loginForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+
+        const email = document.getElementById("loginEmail").value.trim();
+
+        const password = document.getElementById("loginPassword").value;
+
+        try {
+          await signInWithEmailAndPassword(auth, email, password);
+
+          loginForm.reset();
+
+          loginStatus.style.display = "none";
+        } catch (error) {
+          console.error(error);
+
+          showLoginStatus("Login failed: " + error.message);
+        }
+      });
+
+      logoutButton.addEventListener("click", async () => {
+        try {
+          await signOut(auth);
+        } catch (error) {
+          console.error(error);
+
+          showStatus("Logout failed: " + error.message, false);
+        }
+      });
+
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          loginScreen.style.display = "none";
+
+          adminApp.style.display = "block";
+
+          authBar.style.display = "block";
+
+          userEmail.textContent = user.email || "Authenticated admin";
+        } else {
+          loginScreen.style.display = "flex";
+
+          adminApp.style.display = "none";
+
+          authBar.style.display = "none";
+
+          userEmail.textContent = "";
+        }
+      }); // --------------------------------------------------
+      // STATE
+      // --------------------------------------------------
+
+      let allNotices = [];
+
+      let editingId = null; // --------------------------------------------------
+      // ELEMENTS
+      // --------------------------------------------------
+
+      const form = document.getElementById("noticeForm");
+
+      const formTitle = document.getElementById("formTitle");
+
+      const submitButton = document.getElementById("submitButton");
+
+      const cancelButton = document.getElementById("cancelButton"); // --------------------------------------------------
+      // STATUS
+      // --------------------------------------------------
+
+      function showStatus(
+        message,
+
+        success = true,
+      ) {
+        const status = document.getElementById("status");
+
+        status.textContent = message;
+
+        status.style.display = "block";
+
+        status.style.background = success ? "#dcfce7" : "#fee2e2";
+
+        status.style.color = success ? "#166534" : "#991b1b";
+      }
+
+      // --------------------------------------------------
+      // RESOURCES
+      // --------------------------------------------------
+
+      function addResourceRow(label = "", url = "") {
+        const row = document.createElement("div");
+        row.className = "resource-row";
+
+        const labelInput = document.createElement("input");
+        labelInput.type = "text";
+        labelInput.className = "resource-label";
+        labelInput.placeholder = "Link title (e.g. Register Now)";
+        labelInput.value = label;
+
+        const urlInput = document.createElement("input");
+        urlInput.type = "url";
+        urlInput.className = "resource-url";
+        urlInput.placeholder = "https://example.com";
+        urlInput.value = url;
+
+        const removeButton = document.createElement("button");
+        removeButton.type = "button";
+        removeButton.className = "resource-remove";
+        removeButton.textContent = "Remove";
+        removeButton.onclick = () => row.remove();
+
+        row.append(labelInput, urlInput, removeButton);
+        resourcesContainer.appendChild(row);
+      }
+
+      function getResources() {
+        const rows = [...resourcesContainer.querySelectorAll(".resource-row")];
+        const resources = [];
+        for (const row of rows) {
+          const label = row.querySelector(".resource-label").value.trim();
+          const url = row.querySelector(".resource-url").value.trim();
+          if (!label && !url) continue;
+          if (!label || !url)
+            throw new Error("Each resource must have both a title and a URL.");
+          resources.push({ label, url });
+        }
+        return resources;
+      }
+
+      function setResources(resources = []) {
+        resourcesContainer.innerHTML = "";
+        (resources || []).forEach((resource) => {
+          if (resource && (resource.label || resource.url))
+            addResourceRow(resource.label || "", resource.url || "");
+        });
+      }
+
+      addResourceButton.addEventListener("click", () => addResourceRow()); // --------------------------------------------------
+      // RESET FORM
+      // --------------------------------------------------
+
+      function resetForm() {
+        form.reset();
+
+        editingId = null;
+
+        formTitle.textContent = "Create New Notice";
+
+        submitButton.textContent = "Publish Notice";
+
+        cancelButton.style.display = "none";
+      } // --------------------------------------------------
+      // CLASSIFY NOTICE
+      // --------------------------------------------------
+
+      function getCategory(notice) {
+        if (!notice.startTime || !notice.endTime) {
+          return "expired";
+        }
+
+        const now = new Date();
+
+        const start = new Date(notice.startTime);
+
+        const end = new Date(notice.endTime);
+
+        if (now < start) {
+          return "upcoming";
+        }
+
+        if (now >= start && now < end) {
+          return "active";
+        }
+
+        return "expired";
+      } // --------------------------------------------------
+      // FORMAT DATE
+      // --------------------------------------------------
+
+      function formatDateTime(value) {
+        if (!value) {
+          return "Not specified";
+        }
+
+        const date = new Date(value);
+
+        return date.toLocaleString();
+      } // --------------------------------------------------
+      // CREATE NOTICE CARD
+      // --------------------------------------------------
+
+      function createNoticeCard(notice) {
+        const card = document.createElement("div");
+
+        card.className = "notice-card";
+
+        const top = document.createElement("div");
+
+        top.className = "notice-top";
+
+        const title = document.createElement("div");
+
+        title.className = "notice-title";
+
+        title.textContent = notice.title || "Untitled";
+
+        const priority = document.createElement("span");
+
+        const priorityValue = notice.priority || "NORMAL";
+
+        priority.className = "priority " + priorityValue;
+
+        priority.textContent = priorityValue;
+
+        top.appendChild(title);
+
+        top.appendChild(priority);
+
+        const description = document.createElement("div");
+
+        description.className = "notice-description";
+
+        description.textContent = notice.description || "";
+
+        const meta = document.createElement("div");
+
+        meta.className = "notice-meta";
+
+        const eventDetails = [];
+        if (notice.date)
+          eventDetails.push("<strong>Event Date:</strong> " + notice.date);
+        if (notice.time)
+          eventDetails.push("<strong>Event Time:</strong> " + notice.time);
+        if (notice.venue)
+          eventDetails.push("<strong>Venue:</strong> " + notice.venue);
+
+        const validityDetails =
+          "<strong>Valid From:</strong> " +
+          formatDateTime(notice.startTime) +
+          "<br>" +
+          "<strong>Valid Until:</strong> " +
+          formatDateTime(notice.endTime);
+
+        meta.innerHTML =
+          (eventDetails.length ? eventDetails.join("<br>") + "<br>" : "") +
+          validityDetails;
+
+        if (Array.isArray(notice.resources) && notice.resources.length) {
+          const resourceList = document.createElement("div");
+          resourceList.className = "resource-list";
+          const resourceHeading = document.createElement("strong");
+          resourceHeading.textContent = "Resources:";
+          resourceList.appendChild(resourceHeading);
+          notice.resources.forEach((resource) => {
+            if (!resource || !resource.url) return;
+            const item = document.createElement("div");
+            item.className = "resource-item";
+            const link = document.createElement("a");
+            link.href = resource.url;
+            link.target = "_blank";
+            link.rel = "noopener noreferrer";
+            link.textContent = resource.label || resource.url;
+            item.appendChild(link);
+            resourceList.appendChild(item);
+          });
+          card.appendChild(resourceList);
+        }
+        const actions = document.createElement("div");
+
+        actions.className = "notice-actions";
+
+        const editButton = document.createElement("button");
+
+        editButton.className = "secondary";
+
+        editButton.textContent = "Edit";
+
+        editButton.onclick = () => editNotice(notice);
+
+        const deleteButton = document.createElement("button");
+
+        deleteButton.className = "danger";
+
+        deleteButton.textContent = "Delete";
+
+        deleteButton.onclick = () => deleteNotice(notice);
+
+        actions.appendChild(editButton);
+
+        actions.appendChild(deleteButton);
+
+        card.appendChild(top);
+
+        card.appendChild(description);
+
+        card.appendChild(meta);
+
+        card.appendChild(actions);
+
+        return card;
+      } // --------------------------------------------------
+      // RENDER LIST
+      // --------------------------------------------------
+
+      function renderList(
+        elementId,
+
+        notices,
+
+        emptyMessage,
+      ) {
+        const container = document.getElementById(elementId);
+
+        container.innerHTML = "";
+
+        if (notices.length === 0) {
+          const empty = document.createElement("div");
+
+          empty.className = "empty";
+
+          empty.textContent = emptyMessage;
+
+          container.appendChild(empty);
+
+          return;
+        }
+
+        notices.forEach((notice) => {
+          container.appendChild(createNoticeCard(notice));
+        });
+      } // --------------------------------------------------
+      // RENDER DASHBOARD
+      // --------------------------------------------------
+
+      function renderDashboard() {
+        const active = [];
+
+        const upcoming = [];
+
+        const expired = [];
+
+        allNotices.forEach((notice) => {
+          const category = getCategory(notice);
+
+          if (category === "active") {
+            active.push(notice);
+          } else if (category === "upcoming") {
+            upcoming.push(notice);
+          } else {
+            expired.push(notice);
+          }
+        }); // Sort newest first
+
+        active.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+
+        upcoming.sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
+
+        expired.sort((a, b) => new Date(b.endTime) - new Date(a.endTime)); // Counts
+
+        document.getElementById("activeCount").textContent = active.length;
+
+        document.getElementById("upcomingCount").textContent = upcoming.length;
+
+        document.getElementById("expiredCount").textContent = expired.length; // Lists
+
+        renderList(
+          "activeList",
+
+          active,
+
+          "No active notices.",
+        );
+
+        renderList(
+          "upcomingList",
+
+          upcoming,
+
+          "No upcoming notices.",
+        );
+
+        renderList(
+          "expiredList",
+
+          expired,
+
+          "No expired notices.",
+        );
+      } // --------------------------------------------------
+      // LOAD DATA
+      // --------------------------------------------------
+
+      onValue(
+        noticesRef,
+
+        (snapshot) => {
+          const data = snapshot.val();
+
+          if (!data) {
+            allNotices = [];
+          } else {
+            allNotices = Object.entries(data)
+
+              .map(([id, notice]) => ({
+                id,
+
+                ...notice,
+              }));
+          }
+
+          renderDashboard();
+        },
+
+        (error) => {
+          console.error(error);
+
+          showStatus(
+            "Firebase error: " + error.message,
+
+            false,
+          );
+        },
+      ); // --------------------------------------------------
+      // PERIODIC DASHBOARD REFRESH
+      // --------------------------------------------------
+
+      setInterval(
+        renderDashboard,
+
+        5000,
+      ); // --------------------------------------------------
+      // CREATE / UPDATE
+      // --------------------------------------------------
+
+      form.addEventListener(
+        "submit",
+
+        async (event) => {
+          event.preventDefault();
+
+          const startTime = document.getElementById("startTime").value;
+
+          const endTime = document.getElementById("endTime").value;
+
+          if (new Date(endTime) <= new Date(startTime)) {
+            showStatus(
+              "Valid Until must be later than Valid From.",
+
+              false,
+            );
+
+            return;
+          }
+
+          let resources;
+          try {
+            resources = getResources();
+          } catch (error) {
+            showStatus(error.message, false);
+            return;
+          }
+
+          const notice = {
+            title: document.getElementById("title").value.trim(),
+            description: document.getElementById("description").value.trim(),
+            priority: document.getElementById("priority").value,
+            startTime: startTime,
+            endTime: endTime,
+            updatedAt: Date.now(),
+          };
+
+          const eventDate = document.getElementById("date").value;
+          const eventTime = document.getElementById("time").value;
+          const venue = document.getElementById("venue").value.trim();
+          if (eventDate) notice.date = eventDate;
+          if (eventTime) notice.time = eventTime;
+          if (venue) notice.venue = venue;
+          if (resources.length) notice.resources = resources;
+
+          try {
+            // EDIT
+
+            if (editingId) {
+              await update(
+                ref(
+                  db,
+
+                  "notices/" + editingId,
+                ),
+
+                notice,
+              );
+
+              showStatus("Notice updated successfully!");
+            } // CREATE
+            else {
+              notice.createdAt = Date.now();
+
+              const newNoticeRef = push(noticesRef);
+
+              await set(
+                newNoticeRef,
+
+                notice,
+              );
+
+              showStatus("Notice published successfully!");
+            }
+
+            resetForm();
+          } catch (error) {
+            console.error(error);
+
+            showStatus(
+              "Error: " + error.message,
+
+              false,
+            );
+          }
+        },
+      ); // --------------------------------------------------
+      // EDIT NOTICE
+      // --------------------------------------------------
+
+      function editNotice(notice) {
+        editingId = notice.id;
+
+        document.getElementById("title").value = notice.title || "";
+
+        document.getElementById("description").value = notice.description || "";
+
+        document.getElementById("date").value = notice.date || "";
+
+        document.getElementById("time").value = notice.time || "";
+
+        document.getElementById("venue").value = notice.venue || "";
+
+        document.getElementById("priority").value = notice.priority || "NORMAL";
+
+        document.getElementById("startTime").value = notice.startTime || "";
+
+        document.getElementById("endTime").value = notice.endTime || "";
+
+        formTitle.textContent = "Edit Notice";
+
+        submitButton.textContent = "Update Notice";
+
+        cancelButton.style.display = "inline-block";
+
+        window.scrollTo({
+          top: 0,
+
+          behavior: "smooth",
+        });
+      } // --------------------------------------------------
+      // CANCEL EDIT
+      // --------------------------------------------------
+
+      cancelButton.onclick = () => {
+        resetForm();
+      }; // --------------------------------------------------
+      // DELETE NOTICE
+      // --------------------------------------------------
+
+      async function deleteNotice(notice) {
+        const confirmed = confirm("Delete this notice?\n\n" + notice.title);
+
+        if (!confirmed) {
+          return;
+        }
+
+        try {
+          await remove(
+            ref(
+              db,
+
+              "notices/" + notice.id,
+            ),
+          );
+
+          showStatus("Notice deleted successfully!");
+        } catch (error) {
+          console.error(error);
+
+          showStatus(
+            "Error deleting notice: " + error.message,
+
+            false,
+          );
+        }
+      }
+    </script>
+  </body>
+</html>
