@@ -163,6 +163,45 @@
         }
 
 
+        /* QR code shown for the currently displayed notice */
+        #qrcode {
+
+            position: absolute;
+
+            right: 28px;
+
+            bottom: 42px;
+
+            width: 130px;
+
+            height: 130px;
+
+            padding: 6px;
+
+            background: white;
+
+            border-radius: 8px;
+
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+
+            z-index: 10;
+
+        }
+
+
+        #qrcode img,
+
+        #qrcode canvas {
+
+            display: block;
+
+            width: 118px !important;
+
+            height: 118px !important;
+
+        }
+
+
         #rotation {
 
             position: absolute;
@@ -269,6 +308,9 @@
 <div id="rotation"></div>
 
 
+<!-- QR Code generator -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
 <script type="module">
 
 
@@ -319,6 +361,19 @@
             "G-HZXBZY8DCG"
 
     };
+
+
+    /*
+     * PUBLIC NOTICE URL
+     *
+     * After we deploy the public-notice page on Vercel, replace
+     * the value below with the actual Vercel URL.
+     *
+     * Example:
+     * https://smart-notice-board.vercel.app/notice
+     */
+    const PUBLIC_NOTICE_BASE_URL =
+        "https://YOUR-VERCEL-DOMAIN.vercel.app/notice";
 
 
     const app =
@@ -393,6 +448,66 @@
 
 
     // --------------------------------------------------
+    // QR CODE
+    // --------------------------------------------------
+
+    function generateQRCode(notice) {
+
+        const qrContainer =
+            document.getElementById("qrcode");
+
+
+        // Clear the previous notice's QR code.
+        qrContainer.innerHTML = "";
+
+
+        if (!notice || !notice.id) {
+
+            qrContainer.style.display = "none";
+
+            return;
+
+        }
+
+
+        // Do not generate a QR until the Vercel URL
+        // has been configured.
+        if (
+            PUBLIC_NOTICE_BASE_URL.includes(
+                "YOUR-VERCEL-DOMAIN"
+            )
+        ) {
+
+            qrContainer.style.display = "none";
+
+            return;
+
+        }
+
+
+        const noticeURL =
+            PUBLIC_NOTICE_BASE_URL +
+            "/" +
+            encodeURIComponent(notice.id);
+
+
+        new QRCode(
+            qrContainer,
+            {
+                text: noticeURL,
+                width: 118,
+                height: 118,
+                correctLevel: QRCode.CorrectLevel.M
+            }
+        );
+
+
+        qrContainer.style.display = "block";
+
+    }
+
+
+    // --------------------------------------------------
     // DISPLAY NOTICE
     // --------------------------------------------------
 
@@ -413,6 +528,9 @@
 
             document.getElementById("rotation")
                 .textContent = "";
+
+            document.getElementById("qrcode")
+                .style.display = "none";
 
             return;
 
@@ -482,6 +600,10 @@
 
         priorityElement.className =
             "priority " + priority;
+
+
+        // Generate QR for this specific Firebase notice.
+        generateQRCode(notice);
 
 
         // Rotation indicator
