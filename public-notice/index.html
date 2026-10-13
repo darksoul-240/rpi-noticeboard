@@ -3,209 +3,402 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Notice Board</title>
-
+  <meta name="theme-color" content="#f2efe6">
+  <meta name="description" content="Campus notices, event details, and useful links in one place.">
+  <title>Campus Notice</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    * {
-      box-sizing: border-box;
+    :root {
+      --paper: #f2efe6;
+      --sheet: #fbfaf5;
+      --ink: #252c26;
+      --green: #294536;
+      --green-soft: #e5eae2;
+      --rust: #b85c43;
+      --muted: #74796f;
+      --rule: #d9d5c9;
+      --danger-paper: #f4e4de;
+      --danger-ink: #8a3828;
+      --radius: 5px;
     }
+
+    * { box-sizing: border-box; }
+
+    html { min-height: 100%; background: var(--paper); }
 
     body {
       margin: 0;
-      font-family: Arial, Helvetica, sans-serif;
-      background: #f4f6f8;
-      color: #1f2937;
+      min-height: 100vh;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: "Source Sans 3", "Segoe UI", sans-serif;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
     }
 
     .page {
-      max-width: 900px;
-      margin: 40px auto;
-      padding: 0 20px;
+      width: min(100% - 40px, 780px);
+      margin: 0 auto;
+      padding: 27px 0 22px;
+    }
+
+    .site-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0 0 18px;
+      margin-bottom: 22px;
+      border-bottom: 1px solid var(--rule);
+    }
+
+    .brand-mark {
+      display: grid;
+      place-items: center;
+      width: 38px;
+      height: 38px;
+      flex: 0 0 38px;
+      background: var(--green);
+      color: var(--sheet);
+      font: 800 13px/1 "Manrope", sans-serif;
+      letter-spacing: -0.04em;
+    }
+
+    .brand-copy { min-width: 0; }
+    .brand-name {
+      margin: 0;
+      color: var(--green);
+      font: 800 13px/1.2 "Manrope", sans-serif;
+      letter-spacing: 0.075em;
+    }
+    .brand-caption {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.2;
+    }
+    .header-note {
+      margin-left: auto;
+      color: var(--muted);
+      font: 700 10px/1.4 "Manrope", sans-serif;
+      letter-spacing: 0.11em;
+      text-align: right;
+      text-transform: uppercase;
+      white-space: nowrap;
     }
 
     .card {
-      background: white;
-      border-radius: 16px;
-      padding: 32px;
-      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+      position: relative;
+      overflow: hidden;
+      background: var(--sheet);
+      border: 1px solid var(--rule);
+      border-radius: var(--radius);
+      padding: clamp(22px, 5vw, 42px);
     }
 
-    .brand {
-      font-size: 14px;
-      font-weight: 700;
-      color: #2563eb;
-      letter-spacing: 0.5px;
-      margin-bottom: 20px;
+    .card::before {
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 4px;
+      background: var(--green);
+      content: "";
+    }
+
+    .notice-kicker {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 17px;
     }
 
     .priority {
-      display: inline-block;
-      padding: 6px 12px;
-      border-radius: 999px;
-      font-size: 12px;
-      font-weight: 700;
-      margin-bottom: 14px;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 5px 9px;
+      border: 1px solid var(--rule);
+      border-radius: 3px;
+      background: var(--green-soft);
+      color: var(--green);
+      font: 800 11px/1.25 "Manrope", sans-serif;
+      letter-spacing: 0.055em;
+      text-transform: uppercase;
     }
-
-    .priority-normal {
-      background: #dbeafe;
-      color: #1d4ed8;
+    .priority::before {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+      content: "";
     }
-
     .priority-high {
-      background: #fee2e2;
-      color: #b91c1c;
+      background: #f3e6df;
+      border-color: #e2c0b3;
+      color: #984630;
     }
-
     .priority-urgent {
-      background: #7f1d1d;
-      color: white;
+      background: var(--danger-ink);
+      border-color: var(--danger-ink);
+      color: #fffaf5;
+    }
+    .notice-type {
+      color: var(--rust);
+      font: 800 10px/1.4 "Manrope", sans-serif;
+      letter-spacing: 0.13em;
+      text-transform: uppercase;
     }
 
+    h1, h2, p { margin-top: 0; }
     h1 {
-      margin: 0 0 18px;
-      font-size: 34px;
-      line-height: 1.2;
-      color: #111827;
+      max-width: 650px;
+      margin-bottom: 17px;
+      font: 800 clamp(29px, 5.2vw, 43px)/1.12 "Manrope", "Segoe UI", sans-serif;
+      letter-spacing: -0.045em;
+      overflow-wrap: anywhere;
     }
 
     .description {
-      font-size: 17px;
-      line-height: 1.7;
+      max-width: 650px;
+      margin-bottom: 27px;
+      color: #444b43;
+      font-size: 18px;
+      line-height: 1.62;
       white-space: pre-wrap;
-      margin-bottom: 28px;
+      overflow-wrap: anywhere;
+    }
+
+    .expired {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin: 0 0 22px;
+      padding: 12px 14px;
+      border-left: 3px solid var(--rust);
+      background: var(--danger-paper);
+      color: var(--danger-ink);
+      font-size: 15px;
+      font-weight: 700;
+      line-height: 1.4;
+    }
+
+    .section-rule {
+      height: 1px;
+      margin: 25px 0 18px;
+      background: var(--rule);
     }
 
     .meta {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 14px;
-      margin-bottom: 26px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0 24px;
+      margin: 0;
     }
-
     .meta-item {
-      background: #f8fafc;
-      border-radius: 10px;
-      padding: 14px;
+      min-width: 0;
+      padding: 13px 0 14px;
+      border-bottom: 1px solid var(--rule);
     }
-
+    .meta-item:last-child:nth-child(odd) { grid-column: 1 / -1; }
     .meta-label {
       display: block;
-      font-size: 12px;
-      font-weight: 700;
-      color: #64748b;
-      text-transform: uppercase;
       margin-bottom: 5px;
+      color: var(--muted);
+      font: 800 10px/1.3 "Manrope", sans-serif;
+      letter-spacing: 0.11em;
+      text-transform: uppercase;
     }
-
     .meta-value {
-      font-size: 15px;
-      color: #1e293b;
+      display: block;
+      color: var(--ink);
+      font-size: 17px;
+      font-weight: 600;
+      line-height: 1.35;
+      overflow-wrap: anywhere;
     }
 
     .validity {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px 8px;
+      margin-top: 20px;
+      color: var(--muted);
       font-size: 13px;
-      color: #64748b;
-      border-top: 1px solid #e5e7eb;
-      padding-top: 18px;
-      margin-bottom: 24px;
+      line-height: 1.55;
     }
+    .validity strong { color: #4a5149; font-weight: 700; }
 
     .resources {
-      border-top: 1px solid #e5e7eb;
-      padding-top: 22px;
+      margin-top: 26px;
+      padding-top: 21px;
+      border-top: 1px solid var(--rule);
     }
-
+    .resources-heading {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
     .resources h2 {
-      font-size: 20px;
-      margin: 0 0 14px;
+      margin: 0;
+      color: var(--green);
+      font: 800 17px/1.35 "Manrope", sans-serif;
+      letter-spacing: -0.025em;
     }
-
+    .resources-note {
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .resource-list {
+      border-top: 1px solid var(--rule);
+    }
     .resource {
-      display: block;
-      padding: 12px 14px;
-      margin-bottom: 10px;
-      border-radius: 9px;
-      background: #eff6ff;
-      color: #1d4ed8;
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      min-height: 54px;
+      padding: 12px 3px;
+      border-bottom: 1px solid var(--rule);
+      color: var(--ink);
+      font-size: 16px;
+      font-weight: 700;
+      line-height: 1.35;
       text-decoration: none;
-      font-weight: 600;
+      overflow-wrap: anywhere;
+      transition: color 140ms ease, padding-left 140ms ease;
     }
-
-    .resource:hover {
-      background: #dbeafe;
+    .resource-number {
+      flex: 0 0 auto;
+      color: var(--rust);
+      font: 800 11px/1 "Manrope", sans-serif;
+      font-variant-numeric: tabular-nums;
+    }
+    .resource-title { flex: 1; min-width: 0; }
+    .resource-arrow {
+      flex: 0 0 auto;
+      color: var(--green);
+      font-size: 18px;
+      transition: transform 140ms ease;
+    }
+    .resource:hover, .resource:focus-visible {
+      padding-left: 7px;
+      color: var(--green);
+    }
+    .resource:hover .resource-arrow, .resource:focus-visible .resource-arrow {
+      transform: translate(2px, -2px);
+    }
+    .resource:focus-visible {
+      outline: 2px solid var(--rust);
+      outline-offset: 2px;
     }
 
     .status {
-      text-align: center;
-      padding: 70px 20px;
+      min-height: 260px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: clamp(24px, 7vw, 48px);
     }
-
-    .status h1 {
-      font-size: 28px;
+    .status-index {
+      margin-bottom: 15px;
+      color: var(--rust);
+      font: 800 10px/1.4 "Manrope", sans-serif;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
     }
-
+    .status h1 { margin-bottom: 12px; font-size: clamp(26px, 4.5vw, 34px); }
     .status p {
-      color: #64748b;
-      line-height: 1.6;
+      max-width: 440px;
+      margin-bottom: 0;
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.55;
     }
 
-    .expired {
-      background: #fff7ed;
-      color: #c2410c;
-      border-radius: 8px;
-      padding: 12px 14px;
-      margin-bottom: 22px;
-      font-weight: 600;
-    }
-
-    .footer {
-      text-align: center;
-      color: #94a3b8;
+    .site-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 17px 2px 0;
+      color: var(--muted);
       font-size: 12px;
-      margin-top: 20px;
+      line-height: 1.4;
+    }
+    .footer-mark {
+      color: var(--green);
+      font: 800 10px/1.4 "Manrope", sans-serif;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
     }
 
-    @media (max-width: 600px) {
+    @media (max-width: 560px) {
       .page {
-        margin: 20px auto;
+        width: min(100% - 28px, 780px);
+        padding-top: 16px;
       }
+      .site-header {
+        gap: 10px;
+        padding-bottom: 14px;
+        margin-bottom: 15px;
+      }
+      .brand-mark { width: 34px; height: 34px; flex-basis: 34px; }
+      .brand-name { font-size: 11px; }
+      .brand-caption { font-size: 12px; }
+      .header-note { font-size: 9px; white-space: normal; max-width: 82px; }
+      .card { padding: 23px 20px 25px 23px; }
+      .notice-kicker { gap: 8px; margin-bottom: 14px; }
+      .priority { font-size: 10px; }
+      h1 { font-size: clamp(27px, 8vw, 35px); line-height: 1.14; }
+      .description { font-size: 17px; line-height: 1.58; margin-bottom: 22px; }
+      .section-rule { margin: 21px 0 10px; }
+      .meta { grid-template-columns: minmax(0, 1fr); }
+      .meta-item, .meta-item:last-child:nth-child(odd) { grid-column: auto; }
+      .meta-item { padding: 12px 0; }
+      .meta-value { font-size: 16px; }
+      .validity { font-size: 12px; margin-top: 17px; }
+      .resources { margin-top: 22px; padding-top: 18px; }
+      .resources-heading { align-items: flex-start; flex-direction: column; gap: 3px; }
+      .resource { min-height: 52px; font-size: 15px; }
+      .site-footer { align-items: flex-start; flex-direction: column; gap: 5px; }
+      .status { min-height: 230px; }
+    }
 
-      .card {
-        padding: 22px;
-      }
-
-      h1 {
-        font-size: 27px;
-      }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { transition: none !important; }
     }
   </style>
 </head>
-
 <body>
   <div class="page">
-    <div id="app">
-      <div class="status">
-        <h1>Loading notice...</h1>
-        <p>Please wait.</p>
+    <header class="site-header" aria-label="Smart Notice Board">
+      <div class="brand-mark" aria-hidden="true">NB</div>
+      <div class="brand-copy">
+        <p class="brand-name">SMART NOTICE BOARD</p>
+        <p class="brand-caption">Campus notices &amp; event details</p>
       </div>
-    </div>
+      <div class="header-note">Public notice<br>board</div>
+    </header>
 
-    <div class="footer">
-      Smart Notice Board
-    </div>
+    <main id="app" aria-live="polite" aria-busy="true">
+      <section class="card status">
+        <div class="status-index">Please wait</div>
+        <h1>Loading notice</h1>
+        <p>We're getting the details for this notice.</p>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <span>For the full details, check the notice above.</span>
+      <span class="footer-mark">Smart Notice Board</span>
+    </footer>
   </div>
 
   <script type="module">
-    import { initializeApp } from
-      "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
-
-    import {
-      getDatabase,
-      ref,
-      get
-    } from
-      "https://www.gstatic.com/firebasejs/12.7.0/firebase-database.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+    import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCkwCE5YYeo8rDk1mPTbwqUtWDe_8iIP3E",
@@ -220,197 +413,165 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
-
     const appContainer = document.getElementById("app");
 
     function escapeHTML(value) {
-      const div = document.createElement("div");
-      div.textContent = value ?? "";
-      return div.innerHTML;
+      return String(value ?? "").replace(/[&<>"']/g, character => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+      })[character]);
+    }
+
+    function safeResourceURL(value) {
+      try {
+        const url = new URL(String(value ?? ""));
+        return ["http:", "https:"].includes(url.protocol) ? url.href : null;
+      } catch {
+        return null;
+      }
     }
 
     function formatDate(value) {
-      if (!value) return "";
-
+      if (!value) return "Not specified";
       const date = new Date(value);
-
-      if (Number.isNaN(date.getTime())) {
-        return value;
-      }
-
-      return date.toLocaleString("en-IN", {
-        dateStyle: "medium",
-        timeStyle: "short"
-      });
+      if (Number.isNaN(date.getTime())) return String(value);
+      return date.toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" });
     }
 
     function getNoticeId() {
-      const parts = window.location.pathname
-        .split("/")
-        .filter(Boolean);
-
+      const parts = window.location.pathname.split("/").filter(Boolean);
       const noticeIndex = parts.indexOf("notice");
-
-      if (noticeIndex !== -1 && parts[noticeIndex + 1]) {
+      if (noticeIndex === -1 || !parts[noticeIndex + 1]) return null;
+      try {
         return decodeURIComponent(parts[noticeIndex + 1]);
+      } catch {
+        return null;
       }
-
-      return null;
     }
 
-    function showStatus(title, message) {
+    function showStatus(title, message, label = "Notice unavailable") {
+      document.getElementById("app").setAttribute("aria-busy", "false");
       appContainer.innerHTML = `
-        <div class="card status">
+        <section class="card status">
+          <div class="status-index">${escapeHTML(label)}</div>
           <h1>${escapeHTML(title)}</h1>
           <p>${escapeHTML(message)}</p>
-        </div>
+        </section>
       `;
+    }
+
+    function normalizeResources(resources) {
+      const values = Array.isArray(resources)
+        ? resources
+        : resources && typeof resources === "object"
+          ? Object.values(resources)
+          : [];
+
+      return values.map(resource => {
+        if (!resource || typeof resource !== "object") return null;
+        const url = safeResourceURL(resource.url);
+        if (!url) return null;
+        return {
+          url,
+          label: String(resource.label || resource.title || url)
+        };
+      }).filter(Boolean);
     }
 
     function renderNotice(notice) {
       const priority = String(notice.priority || "NORMAL").toUpperCase();
+      const priorityClass = priority === "URGENT"
+        ? "priority-urgent"
+        : priority === "HIGH"
+          ? "priority-high"
+          : "priority-normal";
 
-      let priorityClass = "priority-normal";
+      const endTime = notice.endTime ? new Date(notice.endTime).getTime() : null;
+      const expired = endTime !== null && !Number.isNaN(endTime) && Date.now() >= endTime;
 
-      if (priority === "HIGH") {
-        priorityClass = "priority-high";
-      } else if (priority === "URGENT") {
-        priorityClass = "priority-urgent";
-      }
-
-      const now = Date.now();
-      const endTime = notice.endTime
-        ? new Date(notice.endTime).getTime()
-        : null;
-
-      const expired =
-        endTime !== null &&
-        !Number.isNaN(endTime) &&
-        now >= endTime;
-
+      // Current admin stores these as `date` and `time`; older public data may use eventDate/eventTime.
+      const eventDate = notice.date || notice.eventDate || "";
+      const eventTime = notice.time || notice.eventTime || "";
       const eventMeta = [];
 
-      if (notice.eventDate) {
-        eventMeta.push(`
-          <div class="meta-item">
-            <span class="meta-label">Event Date</span>
-            <span class="meta-value">${escapeHTML(notice.eventDate)}</span>
+      if (eventDate) eventMeta.push({ label: "Event date", value: eventDate });
+      if (eventTime) eventMeta.push({ label: "Event time", value: eventTime });
+      if (notice.venue) eventMeta.push({ label: "Venue", value: notice.venue });
+
+      const metaHTML = eventMeta.map(item => `
+        <div class="meta-item">
+          <span class="meta-label">${escapeHTML(item.label)}</span>
+          <span class="meta-value">${escapeHTML(item.value)}</span>
+        </div>
+      `).join("");
+
+      const validResources = normalizeResources(notice.resources);
+      const resourcesHTML = validResources.length ? `
+        <section class="resources" aria-labelledby="resourcesHeading">
+          <div class="resources-heading">
+            <h2 id="resourcesHeading">Resources</h2>
+            <span class="resources-note">Open a link for more information</span>
           </div>
-        `);
-      }
-
-      if (notice.eventTime) {
-        eventMeta.push(`
-          <div class="meta-item">
-            <span class="meta-label">Event Time</span>
-            <span class="meta-value">${escapeHTML(notice.eventTime)}</span>
-          </div>
-        `);
-      }
-
-      if (notice.venue) {
-        eventMeta.push(`
-          <div class="meta-item">
-            <span class="meta-label">Venue</span>
-            <span class="meta-value">${escapeHTML(notice.venue)}</span>
-          </div>
-        `);
-      }
-
-      const resources = Array.isArray(notice.resources)
-        ? notice.resources
-        : [];
-
-      const validResources = resources.filter(
-        resource => resource && resource.url
-      );
-
-      const resourcesHTML = validResources.length > 0
-        ? `
-          <div class="resources">
-            <h2>Resources</h2>
-            ${validResources.map(resource => `
-              <a
-                class="resource"
-                href="${escapeHTML(resource.url)}"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                ${escapeHTML(resource.label || resource.title || resource.url)}
+          <div class="resource-list">
+            ${validResources.map((resource, index) => `
+              <a class="resource" href="${escapeHTML(resource.url)}" target="_blank" rel="noopener noreferrer">
+                <span class="resource-number">${String(index + 1).padStart(2, "0")}</span>
+                <span class="resource-title">${escapeHTML(resource.label)}</span>
+                <span class="resource-arrow" aria-hidden="true">↗</span>
               </a>
             `).join("")}
           </div>
-        `
-        : "";
+        </section>
+      ` : "";
 
+      appContainer.setAttribute("aria-busy", "false");
       appContainer.innerHTML = `
-        <div class="card">
-          <div class="brand">SMART NOTICE BOARD</div>
-
-          <div class="priority ${priorityClass}">
-            ${escapeHTML(priority)}
+        <article class="card">
+          <div class="notice-kicker">
+            <span class="priority ${priorityClass}">${escapeHTML(priority)} priority</span>
+            <span class="notice-type">Campus announcement</span>
           </div>
 
-          <h1>${escapeHTML(notice.title || "Untitled Notice")}</h1>
+          <h1>${escapeHTML(notice.title || "Untitled notice")}</h1>
 
-          ${
-            expired
-              ? `<div class="expired">This notice has expired.</div>`
-              : ""
-          }
+          ${expired ? `<div class="expired" role="status">This notice has expired. The information and attached links are still available for reference.</div>` : ""}
 
-          <div class="description">
-            ${escapeHTML(notice.description || "")}
-          </div>
+          ${notice.description ? `<div class="description">${escapeHTML(notice.description)}</div>` : ""}
 
-          ${
-            eventMeta.length > 0
-              ? `<div class="meta">${eventMeta.join("")}</div>`
-              : ""
-          }
+          ${metaHTML ? `<div class="section-rule"></div><section class="meta" aria-label="Event details">${metaHTML}</section>` : ""}
 
           <div class="validity">
-            Valid from <strong>${escapeHTML(formatDate(notice.startTime))}</strong>
-            to <strong>${escapeHTML(formatDate(notice.endTime))}</strong>
+            <span>Notice validity</span>
+            <strong>${escapeHTML(formatDate(notice.startTime))}</strong>
+            <span>to</span>
+            <strong>${escapeHTML(formatDate(notice.endTime))}</strong>
           </div>
 
           ${resourcesHTML}
-        </div>
+        </article>
       `;
     }
 
     async function loadNotice() {
       const noticeId = getNoticeId();
-
       if (!noticeId) {
-        showStatus(
-          "Notice not found",
-          "This page must be opened using a valid notice QR code."
-        );
+        showStatus("Notice not found", "Open this page using the QR code attached to a notice.");
         return;
       }
 
       try {
-        const noticeRef = ref(db, `notices/${noticeId}`);
-        const snapshot = await get(noticeRef);
-
+        const snapshot = await get(ref(db, `notices/${noticeId}`));
         if (!snapshot.exists()) {
-          showStatus(
-            "Notice not found",
-            "The requested notice does not exist or may have been removed."
-          );
+          showStatus("Notice not found", "This notice may have been removed, or the link may be incorrect.");
           return;
         }
-
         renderNotice(snapshot.val());
-
       } catch (error) {
         console.error("Failed to load notice:", error);
-
-        showStatus(
-          "Unable to load notice",
-          "Please check your internet connection and try again."
-        );
+        showStatus("Couldn't load this notice", "Check your internet connection and try opening the QR link again.");
       }
     }
 
