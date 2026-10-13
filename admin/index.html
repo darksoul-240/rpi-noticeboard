@@ -690,6 +690,127 @@
         .notice-top { gap: 10px; }
       }
 
+      /* Mobile refinements: preserve the desktop design, improve touch and fit */
+      @media (max-width: 650px) {
+        body {
+          padding: 12px;
+          padding-top: 17px;
+          font-size: 16px;
+        }
+
+        .container { width: 100%; }
+
+        .login-screen {
+          width: 100%;
+          border-left: 0;
+          border-right: 0;
+        }
+
+        .login-aside {
+          min-height: 0;
+          padding: 22px 20px 24px;
+        }
+
+        .login-aside .eyebrow { font-size: 9px; }
+        .login-wordmark { padding: 27px 0 12px; font-size: clamp(38px, 11vw, 52px); }
+        .login-aside-copy { max-width: 34ch; font-size: 14px; }
+        .login-footer { margin-top: 22px; font-size: 9px; }
+        .login-card { padding: 27px 20px 29px; }
+        .login-card h2 { font-size: clamp(30px, 8vw, 38px); line-height: 1.08; }
+        .login-intro { margin-bottom: 25px; }
+        .login-field { margin-bottom: 17px; }
+
+        /* 16px prevents automatic input zoom on iPhones. */
+        input, textarea, select {
+          min-height: 48px;
+          padding: 12px 13px;
+          font-size: 16px;
+          border-radius: 3px;
+        }
+
+        textarea { min-height: 140px; }
+        input[type="date"], input[type="time"], input[type="datetime-local"] {
+          width: 100%;
+          min-width: 0;
+          max-width: 100%;
+          min-height: 48px;
+          padding-right: 8px;
+        }
+
+        label { margin-bottom: 7px; font-size: 12px; }
+        .optional-label { font-size: 11px; }
+
+        .header { gap: 16px; margin-bottom: 22px; }
+        .header-brand { align-items: flex-start; gap: 11px; }
+        .brand-mark { flex-basis: 42px; width: 42px; height: 42px; font-size: 19px; }
+        .header h1 { font-size: clamp(27px, 7.8vw, 36px); line-height: 1.05; overflow-wrap: anywhere; }
+        .header-copy > p:last-child { font-size: 13px; line-height: 1.45; }
+        .auth-bar { gap: 10px; align-items: center; }
+        .user-email { max-width: calc(100% - 112px); font-size: 12px; overflow-wrap: anywhere; }
+        #logoutButton { flex: 0 0 auto; min-height: 44px; padding: 10px 12px; }
+
+        #status { margin: 0 0 18px; padding: 12px; overflow-wrap: anywhere; }
+        .card { margin-bottom: 19px; box-shadow: 3px 3px 0 var(--shadow); }
+        .compose-card { padding: 20px 15px; }
+        .compose-card > h2 { margin-bottom: 21px; padding-bottom: 16px; font-size: 25px; }
+        .compose-card > h2::before { font-size: 9px; }
+        .grid { gap: 17px; }
+        .validity { padding: 13px; }
+        .validity-grid { gap: 16px; }
+        .validity > label { margin-bottom: 13px; }
+
+        .resources-section { margin-top: 23px; padding-top: 19px; }
+        .resource-help { font-size: 13px; }
+        #resourcesContainer { gap: 11px; }
+        .resource-row {
+          grid-template-columns: minmax(0, 1fr);
+          gap: 9px;
+          padding: 11px;
+        }
+        .resource-row input { min-width: 0; }
+        .resource-remove { justify-self: stretch; width: 100%; min-height: 44px; }
+        #addResourceButton { width: 100%; min-height: 46px; }
+
+        button { min-height: 46px; padding: 12px 14px; font-size: 11px; }
+        .button-row { gap: 9px; margin-top: 23px; padding-top: 18px; }
+        .button-row button { min-height: 48px; }
+        #submitButton { min-width: 0; }
+
+        .section { margin-top: 31px; }
+        .section-header { gap: 9px; margin-bottom: 12px; }
+        .section-header h2 { font-size: 23px; }
+        .notice-list { gap: 12px; }
+        .notice-card { padding: 15px 13px; }
+        .notice-top { align-items: flex-start; gap: 9px; }
+        .notice-title { font-size: 20px; line-height: 1.3; }
+        .priority { max-width: 112px; white-space: normal; text-align: center; line-height: 1.25; font-size: 9px; }
+        .notice-description { margin-top: 9px; font-size: 15px; line-height: 1.6; }
+        .notice-meta { margin-top: 13px; padding-top: 11px; font-size: 13px; line-height: 1.7; }
+        .resource-list { align-items: flex-start; gap: 8px 10px; padding: 11px; font-size: 13px; }
+        .resource-list > strong { flex-basis: 100%; }
+        .resource-item { max-width: 100%; overflow-wrap: anywhere; }
+        .notice-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .notice-actions button { width: 100%; min-height: 44px; padding: 10px 8px; font-size: 10px; }
+        .empty { padding: 20px 15px; }
+      }
+
+      @media (max-width: 380px) {
+        body { padding: 9px; padding-top: 15px; }
+        .header-brand { gap: 9px; }
+        .brand-mark { flex-basis: 36px; width: 36px; height: 36px; font-size: 17px; }
+        .header h1 { font-size: 26px; }
+        .header-copy .eyebrow { font-size: 9px; letter-spacing: 0.12em; }
+        .compose-card { padding: 18px 12px; }
+        .notice-top { flex-direction: column; }
+        .priority { order: -1; }
+        .notice-actions { grid-template-columns: 1fr; }
+        .login-card { padding-right: 16px; padding-left: 16px; }
+      }
+
+      @media (hover: none) {
+        button:hover, .notice-card:hover { transform: none; }
+      }
+
       @media (prefers-reduced-motion: reduce) {
         *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; }
       }
