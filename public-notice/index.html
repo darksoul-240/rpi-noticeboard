@@ -278,16 +278,13 @@
     .resource-title { flex: 1; min-width: 0; }
     .resource-arrow {
       flex: 0 0 auto;
-      color: var(--green);
-      font-size: 18px;
-      transition: transform 140ms ease;
+      font-size: 16px;
+      line-height: 1;
+      opacity: 0.9;
     }
     .resource:hover, .resource:focus-visible {
       padding-left: 7px;
       color: var(--green);
-    }
-    .resource:hover .resource-arrow, .resource:focus-visible .resource-arrow {
-      transform: translate(2px, -2px);
     }
     .resource:focus-visible {
       outline: 2px solid var(--rust);
@@ -520,7 +517,7 @@
               <a class="resource" href="${escapeHTML(resource.url)}" target="_blank" rel="noopener noreferrer">
                 <span class="resource-number">${String(index + 1).padStart(2, "0")}</span>
                 <span class="resource-title">${escapeHTML(resource.label)}</span>
-                <span class="resource-arrow" aria-hidden="true">↗</span>
+                <span class="resource-arrow" aria-hidden="true">🔗</span>
               </a>
             `).join("")}
           </div>
