@@ -8,447 +8,748 @@
 
     <title>Smart Notice Board — Admin</title>
 
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
     <style>
-      * {
-        box-sizing: border-box;
+      :root {
+        --paper: #f2efe6;
+        --surface: #fbf9f3;
+        --surface-deep: #eae7dc;
+        --ink: #232a25;
+        --muted: #72766d;
+        --line: #d6d2c6;
+        --forest: #294536;
+        --forest-deep: #1e3528;
+        --rust: #b85c43;
+        --rust-pale: #f2e2da;
+        --green-pale: #e3e9df;
+        --shadow: rgba(35, 42, 37, 0.055);
       }
+
+      * { box-sizing: border-box; }
+
+      html { scroll-behavior: smooth; }
 
       body {
         margin: 0;
-
-        padding: 30px;
-
-        font-family: Arial, sans-serif;
-
-        background: #f3f4f6;
-
-        color: #111827;
+        padding: clamp(16px, 3.3vw, 44px);
+        background: var(--paper);
+        color: var(--ink);
+        font-family: "Source Sans 3", sans-serif;
+        font-size: 15px;
+        line-height: 1.5;
+        -webkit-font-smoothing: antialiased;
       }
+
+      body::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 5px;
+        background: var(--forest);
+      }
+
+      button, input, textarea, select { font: inherit; }
+      button { -webkit-tap-highlight-color: transparent; }
 
       .container {
-        max-width: 1100px;
-
-        margin: auto;
+        max-width: 1180px;
+        margin: 0 auto;
       }
 
-      .header {
+      /* Login: quiet, print-inspired split composition */
+      .login-screen {
+        display: grid;
+        grid-template-columns: minmax(0, 1.04fr) minmax(360px, 0.86fr);
+        width: min(100%, 1260px);
+        min-height: min(820px, calc(100vh - 88px));
+        margin: 0 auto;
+        overflow: hidden;
+        border: 1px solid #c9c7b9;
+        background: var(--surface);
+      }
+
+      .login-aside {
+        position: relative;
+        isolation: isolate;
         display: flex;
-
+        flex-direction: column;
         justify-content: space-between;
-
-        align-items: center;
-
-        margin-bottom: 25px;
+        min-height: 600px;
+        overflow: hidden;
+        padding: clamp(30px, 5.5vw, 72px);
+        background: var(--forest);
+        color: var(--surface);
       }
 
-      .header h1 {
+      .login-aside::after {
+        content: "NB";
+        position: absolute;
+        z-index: -1;
+        right: -0.07em;
+        bottom: -0.26em;
+        color: rgba(251, 249, 243, 0.045);
+        font-family: "Manrope", sans-serif;
+        font-size: clamp(190px, 27vw, 380px);
+        line-height: 0.9;
+        letter-spacing: -0.09em;
+        pointer-events: none;
+      }
+
+      .eyebrow, .micro-label {
         margin: 0;
-
-        font-size: 30px;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.17em;
+        line-height: 1.5;
+        text-transform: uppercase;
       }
 
-      .header p {
-        margin-top: 6px;
+      .login-aside .eyebrow { color: #d6cbbb; }
 
-        color: #6b7280;
+      .login-wordmark {
+        max-width: 570px;
+        margin: auto 0;
+        padding: 55px 0 70px;
+        font-family: "Manrope", sans-serif;
+        font-size: clamp(43px, 5.4vw, 68px);
+        line-height: 1.05;
+        letter-spacing: -0.055em;
+      }
+
+      .login-wordmark em {
+        color: #d3a28d;
+        font-weight: 400;
+      }
+
+      .login-aside-copy {
+        max-width: 330px;
+        margin: 25px 0 0;
+        color: #d8ded5;
+        font-size: 14px;
+        line-height: 1.8;
+      }
+
+      .login-footer {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding-top: 20px;
+        border-top: 1px solid rgba(251, 249, 243, 0.23);
+        color: #c6d0c6;
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: 0.13em;
+        text-transform: uppercase;
+      }
+
+      .login-footer::before {
+        content: "";
+        width: 25px;
+        height: 2px;
+        background: #d3a28d;
       }
 
       .card {
-        background: white;
-
-        border-radius: 12px;
-
-        padding: 25px;
-
+        min-width: 0;
         margin-bottom: 25px;
-
-        box-shadow: 0 3px 15px rgba(0, 0, 0, 0.08);
+        padding: clamp(24px, 3.8vw, 40px);
+        border: 1px solid var(--line);
+        border-radius: 2px;
+        background: var(--surface);
+        box-shadow: 5px 5px 0 var(--shadow);
       }
 
-      .card h2 {
-        margin-top: 0;
-      }
-
-      .grid {
-        display: grid;
-
-        grid-template-columns: repeat(2, 1fr);
-
-        gap: 18px;
-      }
-
-      .full {
-        grid-column: 1 / -1;
-      }
-
-      label {
-        display: block;
-
-        font-weight: bold;
-
-        margin-bottom: 6px;
-      }
-
-      input,
-      textarea,
-      select {
-        width: 100%;
-
-        padding: 11px;
-
-        border: 1px solid #d1d5db;
-
-        border-radius: 7px;
-
-        font-size: 15px;
-
-        font-family: inherit;
-      }
-
-      textarea {
-        min-height: 100px;
-
-        resize: vertical;
-      }
-
-      input:focus,
-      textarea:focus,
-      select:focus {
-        outline: none;
-
-        border-color: #2563eb;
-      }
-
-      .validity {
-        background: #f9fafb;
-
-        padding: 18px;
-
-        border-radius: 8px;
-
-        border: 1px solid #e5e7eb;
-      }
-
-      .validity-grid {
-        display: grid;
-
-        grid-template-columns: 1fr 1fr;
-
-        gap: 15px;
-      }
-
-      button {
-        border: none;
-
-        border-radius: 7px;
-
-        padding: 11px 18px;
-
-        font-size: 15px;
-
-        font-weight: bold;
-
-        cursor: pointer;
-      }
-
-      .primary {
-        background: #2563eb;
-
-        color: white;
-      }
-
-      .primary:hover {
-        background: #1d4ed8;
-      }
-
-      .secondary {
-        background: #e5e7eb;
-
-        color: #111827;
-      }
-
-      .secondary:hover {
-        background: #d1d5db;
-      }
-
-      .danger {
-        background: #dc2626;
-
-        color: white;
-      }
-
-      .danger:hover {
-        background: #b91c1c;
-      }
-
-      .button-row {
+      .login-card {
         display: flex;
+        flex-direction: column;
+        justify-content: center;
+        margin: 0;
+        padding: clamp(28px, 5vw, 68px);
+        border: 0;
+        box-shadow: none;
+        background: var(--surface);
+      }
 
-        gap: 10px;
+      .login-card .eyebrow { color: var(--rust); }
 
-        margin-top: 20px;
+      .login-card h2 {
+        margin: 12px 0 0;
+        font-family: "Manrope", sans-serif;
+        font-size: clamp(32px, 3.8vw, 43px);
+        font-weight: 400;
+        line-height: 1;
+        letter-spacing: -0.035em;
+      }
+
+      .period { color: var(--rust); }
+
+      .login-intro {
+        max-width: 300px;
+        margin: 13px 0 34px;
+        color: var(--muted);
+        line-height: 1.7;
+      }
+
+      .login-field { margin-bottom: 20px; }
+
+      .login-note {
+        margin: 22px 0 0;
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.65;
+      }
+
+      /* Main dashboard masthead */
+      .header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 28px;
+        margin-bottom: 34px;
+        padding: 8px 0 28px;
+        border-bottom: 1px solid #c9c7b9;
+      }
+
+      .header-brand {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        min-width: 0;
+      }
+
+      .brand-mark {
+        display: grid;
+        flex: 0 0 55px;
+        place-items: center;
+        width: 55px;
+        height: 55px;
+        background: var(--forest);
+        color: var(--surface);
+        font-family: "Manrope", sans-serif;
+        font-size: 23px;
+        letter-spacing: -0.06em;
+      }
+
+      .brand-mark span { color: #d3a28d; }
+      .header-copy { min-width: 0; }
+      .header-copy .eyebrow { margin-bottom: 5px; color: var(--rust); }
+
+      .header h1 {
+        margin: 0;
+        font-family: "Manrope", sans-serif;
+        font-size: clamp(32px, 3.8vw, 44px);
+        font-weight: 400;
+        line-height: 0.98;
+        letter-spacing: -0.035em;
+      }
+
+      .header-copy > p:last-child {
+        margin: 9px 0 0;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .auth-bar {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 13px;
+        padding-top: 5px;
+      }
+
+      .user-email {
+        max-width: 240px;
+        overflow-wrap: anywhere;
+        color: var(--muted);
+        font-size: 12px;
       }
 
       #status {
         display: none;
-
-        padding: 12px;
-
-        border-radius: 7px;
-
-        margin-bottom: 20px;
-
-        font-weight: bold;
+        margin: -8px 0 22px;
+        padding: 13px 16px;
+        border: 1px solid var(--line);
+        border-left: 3px solid var(--forest);
+        border-radius: 2px;
+        font-size: 13px;
+        font-weight: 600;
       }
 
+      #loginStatus {
+        font-size: 13px;
+        line-height: 1.5;
+      }
+
+      /* Compose form */
+      .compose-card { padding: clamp(23px, 4vw, 42px); }
+
+      .compose-card > h2 {
+        margin: 0 0 26px;
+        padding-bottom: 19px;
+        border-bottom: 1px solid var(--line);
+        font-family: "Manrope", sans-serif;
+        font-size: 27px;
+        font-weight: 700;
+        line-height: 1.2;
+        letter-spacing: -0.045em;
+      }
+
+      .compose-card > h2::before {
+        content: "01 / COMPOSE A NOTICE";
+        display: block;
+        margin-bottom: 10px;
+        color: var(--rust);
+        font-family: "Source Sans 3", sans-serif;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.16em;
+        line-height: 1.4;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 21px 22px;
+      }
+
+      .full { grid-column: 1 / -1; }
+
+      label {
+        display: block;
+        margin-bottom: 8px;
+        color: #3d453d;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.045em;
+      }
+
+      .optional-label {
+        margin-left: 4px;
+        color: #85877d;
+        font-size: 10px;
+        font-weight: 500;
+        letter-spacing: 0;
+      }
+
+      input, textarea, select {
+        width: 100%;
+        min-width: 0;
+        padding: 12px 13px;
+        border: 1px solid #d0cdc1;
+        border-radius: 2px;
+        outline: none;
+        background: #f8f6f0;
+        color: var(--ink);
+        font-size: 14px;
+        font-weight: 400;
+        transition: border-color 150ms ease, background-color 150ms ease, box-shadow 150ms ease;
+      }
+
+      input::placeholder, textarea::placeholder { color: #a1a095; }
+      input:hover, textarea:hover, select:hover { border-color: #a5aa9d; }
+
+      input:focus, textarea:focus, select:focus {
+        border-color: var(--forest);
+        background: #fffdf8;
+        box-shadow: 0 0 0 2px rgba(41, 69, 54, 0.09);
+      }
+
+      textarea {
+        min-height: 125px;
+        resize: vertical;
+        line-height: 1.65;
+      }
+
+      input[type="date"], input[type="time"], input[type="datetime-local"] {
+        min-height: 44px;
+      }
+
+      .validity {
+        padding: 20px;
+        border: 1px solid var(--line);
+        border-left: 3px solid var(--forest);
+        border-radius: 2px;
+        background: #f0eee6;
+      }
+
+      .validity > label {
+        margin-bottom: 15px;
+        color: var(--forest);
+        font-size: 10px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+      }
+
+      .validity-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 15px;
+      }
+
+      .resources-section {
+        margin-top: 26px;
+        padding-top: 22px;
+        border-top: 1px solid var(--line);
+      }
+
+      .resources-section > label {
+        margin-bottom: 5px;
+        color: var(--ink);
+        font-size: 13px;
+        letter-spacing: 0;
+      }
+
+      .resource-help {
+        margin-bottom: 14px;
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.65;
+      }
+
+      #resourcesContainer {
+        display: grid;
+        gap: 9px;
+        margin-bottom: 12px;
+      }
+
+      .resource-row {
+        display: grid;
+        grid-template-columns: minmax(150px, 0.85fr) minmax(200px, 1.4fr) auto;
+        gap: 9px;
+        align-items: center;
+        padding: 10px;
+        border: 1px solid var(--line);
+        background: #f5f2ea;
+      }
+
+      .resource-row input { background: var(--surface); }
+
+      button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        min-height: 42px;
+        padding: 11px 17px;
+        border: 1px solid transparent;
+        border-radius: 2px;
+        cursor: pointer;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.075em;
+        line-height: 1.2;
+        text-transform: uppercase;
+        transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease, transform 150ms ease;
+      }
+
+      button:hover { transform: translateY(-1px); }
+      button:active { transform: translateY(0); }
+      button:focus-visible { outline: 2px solid var(--rust); outline-offset: 3px; }
+
+      .primary {
+        background: var(--forest);
+        color: var(--surface);
+      }
+
+      .primary:hover { background: var(--forest-deep); }
+
+      .secondary {
+        border-color: #c8c8bb;
+        background: transparent;
+        color: var(--ink);
+      }
+
+      .secondary:hover { border-color: var(--forest); background: #e9e9df; }
+
+      .danger {
+        border-color: #d9b7a9;
+        background: var(--rust-pale);
+        color: #8e402e;
+      }
+
+      .danger:hover { border-color: var(--rust); background: #ead1c6; }
+
+      .resource-remove {
+        min-height: 39px;
+        padding: 9px 11px;
+        border-color: #d9b7a9;
+        background: transparent;
+        color: #8e402e;
+        font-size: 10px;
+      }
+
+      .button-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 27px;
+        padding-top: 22px;
+        border-top: 1px solid var(--line);
+      }
+
+      #submitButton { min-width: 170px; }
+
+      /* Live notice register */
       .section {
-        margin-top: 30px;
+        margin-top: 45px;
+        counter-increment: notice-section;
       }
+
+      #adminApp { counter-reset: notice-section; }
 
       .section-header {
         display: flex;
-
         align-items: center;
+        gap: 12px;
+        margin-bottom: 15px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid #c9c7b9;
+      }
 
-        gap: 10px;
-
-        margin-bottom: 12px;
+      .section-header::before {
+        content: "0" counter(notice-section);
+        color: var(--rust);
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.1em;
       }
 
       .section-header h2 {
         margin: 0;
+        font-family: "Manrope", sans-serif;
+        font-size: 24px;
+        font-weight: 700;
+        line-height: 1.15;
+        letter-spacing: -0.04em;
       }
 
       .count {
-        background: #e5e7eb;
-
-        padding: 4px 9px;
-
-        border-radius: 20px;
-
-        font-size: 13px;
-
-        font-weight: bold;
+        display: inline-grid;
+        place-items: center;
+        min-width: 28px;
+        height: 25px;
+        margin-left: 1px;
+        padding: 0 7px;
+        border: 1px solid var(--line);
+        border-radius: 2px;
+        background: var(--surface-deep);
+        color: var(--ink);
+        font-size: 11px;
+        font-weight: 700;
+        font-variant-numeric: tabular-nums;
       }
 
-      .notice-list {
-        display: flex;
-
-        flex-direction: column;
-
-        gap: 12px;
-      }
+      .notice-list { display: flex; flex-direction: column; gap: 11px; }
 
       .notice-card {
-        background: white;
-
-        border-radius: 10px;
-
-        padding: 18px;
-
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+        position: relative;
+        padding: 21px 23px;
+        border: 1px solid var(--line);
+        border-left: 3px solid var(--forest);
+        border-radius: 2px;
+        background: var(--surface);
+        box-shadow: 3px 3px 0 var(--shadow);
+        transition: border-color 150ms ease, transform 150ms ease;
       }
 
-      .notice-top {
-        display: flex;
-
-        justify-content: space-between;
-
-        align-items: flex-start;
-
-        gap: 15px;
-      }
+      .notice-card:hover { border-top-color: #b5b4a7; transform: translateX(2px); }
+      .notice-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 18px; }
 
       .notice-title {
-        font-size: 19px;
-
-        font-weight: bold;
+        min-width: 0;
+        font-family: "Manrope", sans-serif;
+        font-size: 20px;
+        font-weight: 700;
+        line-height: 1.3;
+        overflow-wrap: anywhere;
       }
 
       .notice-description {
-        margin-top: 7px;
-
-        color: #4b5563;
-
-        line-height: 1.5;
+        margin-top: 10px;
+        color: #555d55;
+        line-height: 1.7;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
       }
 
       .notice-meta {
-        margin-top: 12px;
+        margin-top: 16px;
+        padding-top: 13px;
+        border-top: 1px solid #e4e0d6;
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.85;
+        overflow-wrap: anywhere;
+      }
 
-        color: #6b7280;
-
-        font-size: 14px;
-
-        line-height: 1.7;
+      .notice-meta strong, .resource-list > strong {
+        color: #41483f;
+        font-weight: 600;
       }
 
       .priority {
         display: inline-block;
+        flex: 0 0 auto;
+        padding: 6px 8px 5px;
+        border: 1px solid transparent;
+        border-radius: 2px;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 0.11em;
+        line-height: 1;
+      }
 
-        padding: 5px 9px;
+      .priority.NORMAL { border-color: #c6d1c1; background: var(--green-pale); color: var(--forest); }
+      .priority.HIGH { border-color: #dfb8a8; background: var(--rust-pale); color: #97472f; }
+      .priority.URGENT { border-color: #9d3f2b; background: #8f3f2e; color: #fff8ef; }
 
-        border-radius: 5px;
-
+      .resource-list {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px 14px;
+        margin-top: 15px;
+        padding: 12px 14px;
+        border: 1px solid var(--line);
+        background: #f1eee5;
         font-size: 12px;
-
-        font-weight: bold;
-
-        color: white;
       }
 
-      .priority.NORMAL {
-        background: #2563eb;
-      }
-
-      .priority.HIGH {
-        background: #dc2626;
-      }
-
-      .priority.URGENT {
-        background: #991b1b;
-      }
+      .resource-list > strong { margin-right: 2px; }
+      .resource-item a { color: var(--forest); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+      .resource-item a:hover { color: var(--rust); }
 
       .notice-actions {
         display: flex;
-
+        flex-wrap: wrap;
         gap: 8px;
-
-        margin-top: 15px;
+        margin-top: 17px;
       }
+
+      .notice-actions button { min-height: 35px; padding: 8px 12px; font-size: 10px; }
 
       .empty {
-        background: white;
-
-        padding: 20px;
-
-        border-radius: 10px;
-
-        color: #6b7280;
-
-        text-align: center;
+        padding: 25px 20px;
+        border: 1px dashed #cfccbf;
+        background: rgba(251, 249, 243, 0.55);
+        color: var(--muted);
+        font-size: 13px;
+        text-align: left;
       }
 
-      /* -----------------------------
+      .empty::before {
+        content: "REGISTER CLEAR";
+        display: block;
+        margin-bottom: 6px;
+        color: #9a9b8f;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+      }
 
-                 RESPONSIVE
+      @media (max-width: 850px) {
+        .login-screen { grid-template-columns: minmax(0, 0.9fr) minmax(330px, 1fr); }
+        .login-aside { padding: 34px; }
+        .login-card { padding: 34px; }
+        .header { align-items: flex-start; }
+        .auth-bar { flex-direction: column; align-items: flex-end; gap: 8px; }
+        .resource-row { grid-template-columns: minmax(0, 1fr); }
+        .resource-remove { justify-self: start; }
+      }
 
-              ----------------------------- */
+      @media (max-width: 650px) {
+        body { padding: 16px; }
+        .login-screen { display: flex; flex-direction: column; min-height: auto; }
+        .login-aside { min-height: 310px; padding: 28px; }
+        .login-aside::after { right: -12px; bottom: -38px; font-size: 210px; }
+        .login-wordmark { padding: 40px 0 25px; font-size: 56px; }
+        .login-aside-copy { margin-top: 13px; }
+        .login-footer { margin-top: 30px; }
+        .login-card { padding: 30px 25px 34px; }
+        .header { flex-direction: column; gap: 18px; margin-bottom: 25px; padding-bottom: 22px; }
+        .header-brand { gap: 13px; }
+        .brand-mark { flex-basis: 45px; width: 45px; height: 45px; font-size: 20px; }
+        .header h1 { font-size: 38px; }
+        .auth-bar { width: 100%; flex-direction: row; justify-content: space-between; align-items: center; }
+        .user-email { max-width: 60%; }
+        .compose-card { padding: 23px 18px; }
+        .compose-card > h2 { font-size: 30px; }
+        .grid, .validity-grid { grid-template-columns: minmax(0, 1fr); }
+        .full { grid-column: auto; }
+        .validity { padding: 15px; }
+        .button-row { flex-direction: column; align-items: stretch; }
+        .button-row button { width: 100%; }
+        .section { margin-top: 35px; }
+        .notice-card { padding: 17px; }
+        .notice-title { font-size: 23px; }
+        .notice-top { gap: 10px; }
+      }
 
-      @media (max-width: 700px) {
-        body {
-          padding: 15px;
-        }
-
-        .grid {
-          grid-template-columns: 1fr;
-        }
-
-        .full {
-          grid-column: auto;
-        }
-
-        .validity-grid {
-          grid-template-columns: 1fr;
-        }
-
-        .header {
-          flex-direction: column;
-
-          align-items: flex-start;
-
-          gap: 10px;
-        }
+      @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; }
       }
     </style>
   </head>
 
   <body>
-    <div
-      id="loginScreen"
-      style="
-        display: flex;
+    <div id="loginScreen" class="login-screen">
+      <aside class="login-aside" aria-label="Smart Notice Board introduction">
+        <p class="eyebrow">Campus communications / Admin desk</p>
+        <div>
+          <div class="login-wordmark">The right news,<br /><em>at the right time.</em></div>
+          <p class="login-aside-copy">
+            A single place to publish campus updates, event details and the links people need to follow through.
+          </p>
+        </div>
+        <div class="login-footer">Smart Notice Board · Administration</div>
+      </aside>
 
-        min-height: 80vh;
-
-        align-items: center;
-
-        justify-content: center;
-      "
-    >
-      <div class="card" style="max-width: 460px; width: 100%">
-        <h2>Admin Login</h2>
-
-        <p style="color: #6b7280; margin: 8px 0 20px">
-          Sign in to manage notices.
-        </p>
+      <section class="card login-card" aria-labelledby="loginHeading">
+        <p class="eyebrow">Restricted access</p>
+        <h2 id="loginHeading">Welcome back<span class="period">.</span></h2>
+        <p class="login-intro">Sign in to write, schedule and manage notices across the board.</p>
 
         <form id="loginForm">
-          <div style="margin-bottom: 15px">
-            <label for="loginEmail">Email</label
-            ><input
-              type="email"
-              id="loginEmail"
-              required
-              autocomplete="username"
-            />
+          <div class="login-field">
+            <label for="loginEmail">Email address</label>
+            <input type="email" id="loginEmail" required autocomplete="username" placeholder="name@college.edu" />
           </div>
 
-          <div style="margin-bottom: 15px">
-            <label for="loginPassword">Password</label
-            ><input
-              type="password"
-              id="loginPassword"
-              required
-              autocomplete="current-password"
-            />
+          <div class="login-field">
+            <label for="loginPassword">Password</label>
+            <input type="password" id="loginPassword" required autocomplete="current-password" placeholder="Enter your password" />
           </div>
 
-          <button type="submit" class="primary" style="width: 100%">
-            Sign In
-          </button>
+          <button type="submit" class="primary" style="width: 100%">Sign in <span aria-hidden="true">↗</span></button>
 
-          <div
-            id="loginStatus"
-            style="
-              display: none;
-
-              margin-top: 15px;
-
-              padding: 12px;
-
-              border-radius: 7px;
-            "
-          ></div>
+          <div id="loginStatus" style="display: none; margin-top: 15px; padding: 12px; border-radius: 2px"></div>
+          <p class="login-note">For authorised administrators only. Notice changes are published to the connected display.</p>
         </form>
-      </div>
+      </section>
     </div>
 
     <div id="adminApp" style="display: none">
       <div class="container">
         <!-- HEADER -->
-
-        <div class="header">
-          <div>
-            <h1>Smart Notice Board</h1>
-
-            <p>Notice Management Dashboard</p>
-
-            <div
-              id="authBar"
-              style="display: none; text-align: right; margin-top: 10px"
-            >
-              <span
-                id="userEmail"
-                style="margin-right: 12px; color: #4b5563"
-              ></span>
-
-              <button type="button" class="secondary" id="logoutButton">
-                Logout
-              </button>
+        <header class="header">
+          <div class="header-brand">
+            <div class="brand-mark" aria-hidden="true">NB<span>.</span></div>
+            <div class="header-copy">
+              <p class="eyebrow">Campus communications / 01</p>
+              <h1>Smart Notice Board</h1>
+              <p>Notice management, minus the paper trail.</p>
             </div>
           </div>
-        </div>
+          <div id="authBar" class="auth-bar" style="display: none">
+            <span id="userEmail" class="user-email"></span>
+            <button type="button" class="secondary" id="logoutButton">Sign out <span aria-hidden="true">↗</span></button>
+          </div>
+        </header>
 
         <!-- STATUS -->
 
@@ -456,7 +757,7 @@
 
         <!-- CREATE / EDIT FORM -->
 
-        <div class="card">
+        <div class="card compose-card">
           <h2 id="formTitle">Create New Notice</h2>
 
           <form id="noticeForm">
@@ -572,7 +873,7 @@
                   <span class="optional-label">(Optional)</span></label
                 >
                 <div
-                  style="color: #6b7280; font-size: 14px; margin-bottom: 12px"
+                  class="resource-help"
                 >
                   Add useful links such as registration forms, brochures,
                   schedules, or other resources.
@@ -756,11 +1057,11 @@
 
           adminApp.style.display = "block";
 
-          authBar.style.display = "block";
+          authBar.style.display = "flex";
 
           userEmail.textContent = user.email || "Authenticated admin";
         } else {
-          loginScreen.style.display = "flex";
+          loginScreen.style.display = "grid";
 
           adminApp.style.display = "none";
 
@@ -966,8 +1267,9 @@
           (eventDetails.length ? eventDetails.join("<br>") + "<br>" : "") +
           validityDetails;
 
+        let resourceList = null;
         if (Array.isArray(notice.resources) && notice.resources.length) {
-          const resourceList = document.createElement("div");
+          resourceList = document.createElement("div");
           resourceList.className = "resource-list";
           const resourceHeading = document.createElement("strong");
           resourceHeading.textContent = "Resources:";
@@ -984,7 +1286,6 @@
             item.appendChild(link);
             resourceList.appendChild(item);
           });
-          card.appendChild(resourceList);
         }
         const actions = document.createElement("div");
 
@@ -1015,6 +1316,8 @@
         card.appendChild(description);
 
         card.appendChild(meta);
+
+        if (resourceList) card.appendChild(resourceList);
 
         card.appendChild(actions);
 

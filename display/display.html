@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Notice Board</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --paper: #f2efe6;
+      --surface: #fbf9f3;
+      --surface-deep: #eae7dc;
+      --ink: #232a25;
+      --muted: #72766d;
+      --line: #d6d2c6;
+      --forest: #294536;
+      --forest-deep: #1e3528;
+      --rust: #b85c43;
+      --rust-pale: #f2e2da;
+      --green-pale: #e3e9df;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body { width: 1024px; height: 600px; margin: 0; }
+
+    body {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: "Source Sans 3", "Trebuchet MS", sans-serif;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+
+    header {
+      position: relative;
+      z-index: 2;
+      flex: 0 0 82px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 28px;
+      padding: 0 44px;
+      border-bottom: 4px solid var(--rust);
+      background: var(--forest);
+      color: var(--surface);
+    }
+
+    .brand-lockup {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      min-width: 0;
+    }
+
+    .brand-mark {
+      display: grid;
+      place-items: center;
+      width: 38px;
+      height: 38px;
+      flex: 0 0 38px;
+      border: 1px solid rgba(251, 249, 243, 0.62);
+      color: var(--surface);
+      font-family: "Manrope", sans-serif;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+    }
+
+    .brand-name {
+      font-family: "Manrope", sans-serif;
+      font-size: 20px;
+      font-weight: 700;
+      line-height: 1.15;
+      letter-spacing: -0.035em;
+    }
+
+    .brand-subtitle {
+      margin-top: 3px;
+      color: #d6ddd4;
+      font-size: 12px;
+      letter-spacing: 0.025em;
+    }
+
+    .header-note {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      color: #d6ddd4;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-align: right;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .header-note::before {
+      content: "";
+      display: block;
+      width: 24px;
+      height: 1px;
+      background: #d3a28d;
+    }
+
+    .content {
+      position: relative;
+      flex: 1 1 auto;
+      min-height: 0;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 166px;
+      gap: 32px;
+      padding: 32px 44px 42px;
+    }
+
+    .notice-copy {
+      min-width: 0;
+      padding-top: 1px;
+    }
+
+    .notice-overline {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      min-height: 24px;
+      margin-bottom: 14px;
+    }
+
+    .priority {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      padding: 4px 9px 3px;
+      background: var(--green-pale);
+      color: var(--forest);
+      font-size: 10px;
+      font-weight: 800;
+      line-height: 1.2;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .priority.HIGH,
+    .priority.URGENT {
+      background: var(--rust-pale);
+      color: #8e432f;
+    }
+
+    .notice-type {
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      max-width: 100%;
+      margin: 0 0 18px;
+      font-family: "Manrope", "Trebuchet MS", sans-serif;
+      font-size: 38px;
+      font-weight: 700;
+      line-height: 1.13;
+      letter-spacing: -0.045em;
+      overflow-wrap: anywhere;
+    }
+
+    .meta {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      margin-bottom: 18px;
+    }
+
+    .meta-row {
+      display: grid;
+      grid-template-columns: 68px minmax(0, 1fr);
+      gap: 10px;
+      align-items: baseline;
+      font-size: 15px;
+      line-height: 1.35;
+    }
+
+    .meta-label {
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .meta-value {
+      color: var(--ink);
+      font-weight: 600;
+      overflow-wrap: anywhere;
+    }
+
+    .description {
+      max-width: 100%;
+      color: #424a43;
+      font-size: 18px;
+      line-height: 1.48;
+      overflow-wrap: anywhere;
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 5;
+      overflow: hidden;
+    }
+
+    .notice-side {
+      align-self: stretch;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-width: 0;
+      padding-left: 22px;
+      border-left: 1px solid var(--line);
+      text-align: center;
+    }
+
+    .scan-label {
+      margin-bottom: 12px;
+      color: var(--muted);
+      font-size: 9px;
+      font-weight: 800;
+      letter-spacing: 0.14em;
+      line-height: 1.5;
+      text-transform: uppercase;
+    }
+
+    #qrcode {
+      width: 132px;
+      height: 132px;
+      flex: 0 0 132px;
+      padding: 6px;
+      border: 1px solid var(--line);
+      background: var(--surface);
+    }
+
+    #qrcode img,
+    #qrcode canvas {
+      display: block;
+      width: 118px !important;
+      height: 118px !important;
+    }
+
+    .scan-caption {
+      max-width: 126px;
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    #loading,
+    #error {
+      position: absolute;
+      z-index: 1;
+      inset: 82px 0 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 35px 80px 58px;
+      background: var(--paper);
+      text-align: center;
+    }
+
+    .state-kicker {
+      margin-bottom: 12px;
+      color: var(--rust);
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.19em;
+      text-transform: uppercase;
+    }
+
+    .state-title {
+      max-width: 680px;
+      margin: 0;
+      font-family: "Manrope", "Trebuchet MS", sans-serif;
+      font-size: 30px;
+      font-weight: 700;
+      letter-spacing: -0.04em;
+      line-height: 1.2;
+    }
+
+    .state-copy {
+      max-width: 420px;
+      margin: 11px 0 0;
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.5;
+    }
+
+    #rotation {
+      position: absolute;
+      right: 44px;
+      bottom: 15px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.09em;
+      font-variant-numeric: tabular-nums;
+    }
+
+    #rotation:not(:empty)::before {
+      content: "NOTICE  ";
+      color: var(--rust);
+      letter-spacing: 0.13em;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand-lockup">
+      <div class="brand-mark" aria-hidden="true">NB</div>
+      <div>
+        <div class="brand-name">Smart Notice Board</div>
+        <div class="brand-subtitle">Campus announcements</div>
+      </div>
+    </div>
+    <div class="header-note">Campus display</div>
+  </header>
+
+  <div id="loading" class="state-message">
+    <div class="state-kicker">Campus / Notice Board</div>
+    <h2 class="state-title">Checking for notices</h2>
+    <p class="state-copy">Updates will appear here automatically.</p>
+  </div>
+
+  <div id="error" class="state-message" style="display: none;">
+    <div class="state-kicker">Campus / Notice Board</div>
+    <h2 class="state-title" id="errorTitle">No active notices</h2>
+    <p class="state-copy" id="errorDetail">New announcements will appear here automatically.</p>
+  </div>
+
+  <main class="content" id="notice" style="display: none;">
+    <section class="notice-copy">
+      <div class="notice-overline">
+        <div id="priority" class="priority">NORMAL PRIORITY</div>
+        <div class="notice-type">Announcement</div>
+      </div>
+      <h1 id="title"></h1>
+      <div class="meta">
+        <div class="meta-row" id="dateRow">
+          <span class="meta-label">Date</span>
+          <span class="meta-value" id="date"></span>
+        </div>
+        <div class="meta-row" id="timeRow">
+          <span class="meta-label">Time</span>
+          <span class="meta-value" id="time"></span>
+        </div>
+        <div class="meta-row" id="venueRow">
+          <span class="meta-label">Venue</span>
+          <span class="meta-value" id="venue"></span>
+        </div>
+      </div>
+      <div class="description" id="description"></div>
+    </section>
+    <aside class="notice-side">
+      <div class="scan-label">Scan for full notice</div>
+      <div id="qrcode" aria-label="QR code for the current notice" style="display: none;"></div>
+      <div class="scan-caption">Details and resources on your phone</div>
+    </aside>
+  </main>
+
+  <div id="rotation"></div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script type="module">
+
+
+    // --------------------------------------------------
+    // FIREBASE
+    // --------------------------------------------------
+
+    import {
+        initializeApp
+    }
+    from
+        "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+
+
+    import {
+        getDatabase,
+        ref,
+        onValue
+    }
+    from
+        "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+
+
+    const firebaseConfig = {
+
+        apiKey:
+            "AIzaSyCkwCE5YYeo8rDk1mPTbwqUtWDe_8iIP3E",
+
+        authDomain:
+            "noticeboard-c1ed5.firebaseapp.com",
+
+        databaseURL:
+            "https://noticeboard-c1ed5-default-rtdb.asia-southeast1.firebasedatabase.app",
+
+        projectId:
+            "noticeboard-c1ed5",
+
+        storageBucket:
+            "noticeboard-c1ed5.firebasestorage.app",
+
+        messagingSenderId:
+            "713125740332",
+
+        appId:
+            "1:713125740332:web:59ce44829c2a749688b689",
+
+        measurementId:
+            "G-HZXBZY8DCG"
+
+    };
+
+
+    /*
+     * PUBLIC NOTICE URL
+     *
+     * After we deploy the public-notice page on Vercel, replace
+     * the value below with the actual Vercel URL.
+     *
+     * Example:
+     * https://smart-notice-board.vercel.app/notice
+     */
+    const PUBLIC_NOTICE_BASE_URL =
+    "https://rpi-noticeboard-public-notice.vercel.app/notice";
+
+
+    const app =
+        initializeApp(firebaseConfig);
+
+
+    const db =
+        getDatabase(app);
+
+
+    const noticesRef =
+        ref(db, "notices");
+
+
+    // --------------------------------------------------
+    // NOTICE STATE
+    // --------------------------------------------------
+
+    let allNotices = [];
+
+    let activeNotices = [];
+
+    let currentIndex = 0;
+
+    let firebaseLoaded = false;
+
+
+    // --------------------------------------------------
+    // GET ACTIVE NOTICES
+    // --------------------------------------------------
+
+    function getActiveNotices() {
+
+        const now =
+            new Date();
+
+
+        return allNotices.filter(
+            notice => {
+
+                if (
+                    !notice.startTime ||
+                    !notice.endTime
+                ) {
+
+                    return false;
+
+                }
+
+
+                const start =
+                    new Date(
+                        notice.startTime
+                    );
+
+
+                const end =
+                    new Date(
+                        notice.endTime
+                    );
+
+
+                return (
+                    now >= start &&
+                    now < end
+                );
+
+            }
+        );
+
+    }
+
+
+    // --------------------------------------------------
+    // QR CODE
+    // --------------------------------------------------
+
+    function generateQRCode(notice) {
+
+        const qrContainer =
+            document.getElementById("qrcode");
+
+
+        // Clear the previous notice's QR code.
+        qrContainer.innerHTML = "";
+
+
+        if (!notice || !notice.id) {
+
+            qrContainer.style.display = "none";
+
+            return;
+
+        }
+
+
+        // Do not generate a QR until the Vercel URL
+        // has been configured.
+        if (
+            PUBLIC_NOTICE_BASE_URL.includes(
+                "YOUR-VERCEL-DOMAIN"
+            )
+        ) {
+
+            qrContainer.style.display = "none";
+
+            return;
+
+        }
+
+
+        const noticeURL =
+            PUBLIC_NOTICE_BASE_URL +
+            "/" +
+            encodeURIComponent(notice.id);
+
+
+        new window.QRCode(
+        qrContainer,
+    {
+        text: noticeURL,
+        width: 118,
+        height: 118,
+        correctLevel: window.QRCode.CorrectLevel.M
+    }
+);
+        
+
+
+        qrContainer.style.display = "block";
+
+    }
+
+
+    // --------------------------------------------------
+    // DISPLAY NOTICE
+    // --------------------------------------------------
+
+    function displayNotice(notice) {
+
+
+        if (!notice) {
+
+            document.getElementById("loading")
+                .style.display = "none";
+
+            document.getElementById("notice")
+                .style.display = "none";
+
+            document.getElementById("error")
+                .style.display = "flex";
+
+            document.getElementById("errorTitle").textContent =
+                "No active notices";
+
+            document.getElementById("errorDetail").textContent =
+                "New announcements will appear here automatically.";
+
+            document.getElementById("rotation")
+                .textContent = "";
+
+            document.getElementById("qrcode")
+                .style.display = "none";
+
+            return;
+
+        }
+
+
+        document.getElementById("loading")
+            .style.display = "none";
+
+
+        document.getElementById("error")
+            .style.display = "none";
+
+
+        document.getElementById("notice")
+            .style.display = "grid";
+
+
+        // Title
+
+        document.getElementById("title")
+            .textContent =
+            notice.title || "";
+
+
+        // Description
+
+        document.getElementById("description")
+            .textContent =
+            notice.description || "";
+
+
+        // Date
+
+        document.getElementById("date")
+            .textContent =
+            notice.date || "";
+
+
+        // Time
+
+        document.getElementById("time")
+            .textContent =
+            notice.time || "";
+
+
+        // Venue
+
+        document.getElementById("venue")
+            .textContent =
+            notice.venue || "";
+
+        // Keep optional event details out of the layout when they are not set.
+        document.getElementById("dateRow").style.display = notice.date ? "grid" : "none";
+        document.getElementById("timeRow").style.display = notice.time ? "grid" : "none";
+        document.getElementById("venueRow").style.display = notice.venue ? "grid" : "none";
+
+
+        // Priority
+
+        const priority =
+            notice.priority || "NORMAL";
+
+
+        const priorityElement =
+            document.getElementById("priority");
+
+
+        priorityElement.textContent =
+            priority + " PRIORITY";
+
+
+        priorityElement.className =
+            "priority " + priority;
+
+
+        // Generate QR for this specific Firebase notice.
+        generateQRCode(notice);
+
+
+        // Rotation indicator
+
+        if (activeNotices.length > 1) {
+
+            document.getElementById("rotation")
+                .textContent =
+                (currentIndex + 1) +
+                " / " +
+                activeNotices.length;
+
+        }
+        else {
+
+            document.getElementById("rotation")
+                .textContent = "";
+
+        }
+
+    }
+
+
+    // --------------------------------------------------
+    // REFRESH ACTIVE NOTICE LIST
+    // --------------------------------------------------
+
+    function refreshActiveNotices() {
+
+
+        const newActiveNotices =
+            getActiveNotices();
+
+
+        // Sort newest first
+
+        newActiveNotices.sort(
+            (a, b) =>
+                (b.createdAt || 0) -
+                (a.createdAt || 0)
+        );
+
+
+        // Check whether the currently displayed
+        // notice still exists in the active list
+
+        const currentNotice =
+            activeNotices[currentIndex];
+
+
+        let newIndex = 0;
+
+
+        if (currentNotice) {
+
+            const foundIndex =
+                newActiveNotices.findIndex(
+                    notice =>
+                        notice.id ===
+                        currentNotice.id
+                );
+
+
+            if (foundIndex !== -1) {
+
+                newIndex =
+                    foundIndex;
+
+            }
+
+        }
+
+
+        activeNotices =
+            newActiveNotices;
+
+
+        // No active notices
+
+        if (
+            activeNotices.length === 0
+        ) {
+
+            currentIndex = 0;
+
+            displayNotice(null);
+
+            return;
+
+        }
+
+
+        // Make sure index is valid
+
+        currentIndex =
+            Math.min(
+                newIndex,
+                activeNotices.length - 1
+            );
+
+
+        displayNotice(
+            activeNotices[currentIndex]
+        );
+
+    }
+
+
+    // --------------------------------------------------
+    // FIREBASE REALTIME LISTENER
+    // --------------------------------------------------
+
+    onValue(
+
+        noticesRef,
+
+
+        (snapshot) => {
+
+
+            const data =
+                snapshot.val();
+
+
+            if (!data) {
+
+                allNotices = [];
+
+                firebaseLoaded = true;
+
+                refreshActiveNotices();
+
+                return;
+
+            }
+
+
+            allNotices =
+
+                Object.entries(data)
+
+                    .map(
+                        ([id, notice]) => ({
+
+                            id,
+
+                            ...notice
+
+                        })
+                    );
+
+
+            firebaseLoaded = true;
+
+
+            // Immediately reevaluate
+
+            refreshActiveNotices();
+
+        },
+
+
+        (error) => {
+
+
+            console.error(error);
+
+
+            firebaseLoaded = false;
+
+
+            document.getElementById("loading")
+                .style.display = "none";
+
+
+            document.getElementById("notice")
+                .style.display = "none";
+
+
+            document.getElementById("error")
+                .style.display = "flex";
+
+
+            document.getElementById("errorTitle").textContent =
+                "Connection issue";
+
+            document.getElementById("errorDetail").textContent =
+                "Firebase ERROR: " + error.code + " | " + error.message;
+
+        }
+
+    );
+
+
+    // --------------------------------------------------
+    // VALIDITY CHECK
+    //
+    // Runs every 5 seconds.
+    //
+    // This handles notices becoming active
+    // or expiring without Firebase changing.
+    // --------------------------------------------------
+
+    setInterval(
+
+        () => {
+
+            if (firebaseLoaded) {
+
+                refreshActiveNotices();
+
+            }
+
+        },
+
+        5000
+
+    );
+
+
+    // --------------------------------------------------
+    // NOTICE ROTATION
+    //
+    // Changes notice every 20 seconds.
+    // Only rotates when there is more than
+    // one active notice.
+    // --------------------------------------------------
+
+    setInterval(
+
+        () => {
+
+
+            if (
+                activeNotices.length <= 1
+            ) {
+
+                return;
+
+            }
+
+
+            // Move to next notice
+
+            currentIndex++;
+
+
+            // Loop back to beginning
+
+            if (
+                currentIndex >=
+                activeNotices.length
+            ) {
+
+                currentIndex = 0;
+
+            }
+
+
+            displayNotice(
+                activeNotices[currentIndex]
+            );
+
+
+        },
+
+        20000
+
+    );
+
+
+</script>
+</body>
+</html>
