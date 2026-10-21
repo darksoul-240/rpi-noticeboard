@@ -980,6 +980,22 @@
                   <option value="URGENT">URGENT</option>
                 </select>
               </div>
+              
+              <!-- AUDIBLE ALERT -->
+
+              <div class="full" id="audibleAlertContainer">
+                <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                  <input
+                    type="checkbox"
+                    id="audibleAlert"
+                    style="width: auto;"
+                  />
+                  Play a short attention beep when published
+                </label>
+                <span class="optional-label">
+                  Only plays on new publication, not when editing a notice.
+                </span>
+              </div>
 
               <!-- VALIDITY -->
 
@@ -1230,6 +1246,14 @@
       // --------------------------------------------------
 
       const form = document.getElementById("noticeForm");
+      
+      const prioritySelect = document.getElementById("priority");
+      const audibleAlertCheckbox = document.getElementById("audibleAlert");
+
+      prioritySelect.addEventListener("change", () => {
+        audibleAlertCheckbox.checked = prioritySelect.value === "URGENT";
+      });
+
 
       const formTitle = document.getElementById("formTitle");
 
@@ -1324,18 +1348,21 @@
       // RESET FORM
       // --------------------------------------------------
 
+      
       function resetForm() {
         form.reset();
         setResources([]);
 
         editingId = null;
 
+        // Default the alert on only for URGENT notices.
+        audibleAlertCheckbox.checked = prioritySelect.value === "URGENT";
+
         formTitle.textContent = "Create New Notice";
-
         submitButton.textContent = "Publish Notice";
-
         cancelButton.style.display = "none";
-      } // --------------------------------------------------
+      }
+ // --------------------------------------------------
       // CLASSIFY NOTICE
       // --------------------------------------------------
 
@@ -1670,6 +1697,10 @@
             // EDIT
 
             if (editingId) {
+              // Editing an existing notice must never create an audible alert.
+              // Explicitly disable the alert flag on the updated notice.
+              notice.audibleAlert = false;
+
               await update(
                 ref(
                   db,
@@ -1682,19 +1713,27 @@
 
               showStatus("Notice updated successfully!");
             } // CREATE
+            
+            // CREATE
             else {
               notice.createdAt = Date.now();
 
               const newNoticeRef = push(noticesRef);
 
+              // Create an audible alert only for a new publication.
+              notice.audibleAlert = audibleAlertCheckbox.checked;
+              if (notice.audibleAlert) {
+                notice.alertEventId = newNoticeRef.key;
+              }
+
               await set(
                 newNoticeRef,
-
                 notice,
               );
 
               showStatus("Notice published successfully!");
             }
+
 
             resetForm();
           } catch (error) {
@@ -1725,6 +1764,8 @@
         document.getElementById("venue").value = notice.venue || "";
 
         document.getElementById("priority").value = notice.priority || "NORMAL";
+
+        audibleAlertCheckbox.checked = false;
 
         document.getElementById("startTime").value = notice.startTime || "";
 

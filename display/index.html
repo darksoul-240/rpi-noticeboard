@@ -507,6 +507,117 @@
     const noticesRef =
         ref(db, "notices");
 
+    // Firebase connection state is used to prevent old alerts from
+    // replaying when the display starts or reconnects.
+    const connectionRef =
+        ref(db, ".info/connected");
+
+    let connectionStatusKnown = false;
+    let firebaseConnected = false;
+    let alertBaselineReady = false;
+    let hasNoticeSnapshot = false;
+    let lastNoticeData = null;
+
+    // Keep event IDs seen during this browser session as an extra guard.
+    // The local Python buzzer service also persists processed event IDs.
+    const seenAlertEventIds = new Set();
+
+    function seedAlertEventIds(data) {
+        if (!data || typeof data !== "object") return;
+
+        Object.values(data).forEach((notice) => {
+            if (
+                notice &&
+                notice.audibleAlert === true &&
+                typeof notice.alertEventId === "string" &&
+                notice.alertEventId.length > 0
+            ) {
+                seenAlertEventIds.add(notice.alertEventId);
+            }
+        });
+    }
+
+    function requestBuzzer(eventId) {
+        // text/plain avoids a CORS preflight. no-cors is intentional:
+        // the local service's response is not needed by this page.
+        fetch("http://127.0.0.1:8765/beep", {
+            method: "POST",
+            mode: "no-cors",
+            headers: {
+                "Content-Type": "text/plain"
+            },
+            body: eventId
+        }).catch((error) => {
+            console.error("Could not contact the local buzzer service:", error);
+        });
+    }
+
+    function processAudibleAlerts(data) {
+        // Always remember the latest snapshot so a connection transition can
+        // baseline it without replaying notices published while disconnected.
+        lastNoticeData = data;
+        hasNoticeSnapshot = true;
+
+        // Initial load, unknown connection state, offline state, and the first
+        // snapshot after reconnect are baseline-only: never beep for old data.
+        if (
+            !connectionStatusKnown ||
+            !firebaseConnected ||
+            !alertBaselineReady
+        ) {
+            seedAlertEventIds(data);
+
+            if (connectionStatusKnown && firebaseConnected) {
+                alertBaselineReady = true;
+            }
+            return;
+        }
+
+        if (!data || typeof data !== "object") return;
+
+        Object.entries(data).forEach(([noticeId, notice]) => {
+            if (
+                !notice ||
+                notice.audibleAlert !== true ||
+                typeof notice.alertEventId !== "string" ||
+                notice.alertEventId.length === 0
+            ) {
+                return;
+            }
+
+            const eventId = notice.alertEventId;
+
+            if (seenAlertEventIds.has(eventId)) return;
+
+            // Mark before making the request, so repeated Firebase snapshots
+            // cannot trigger duplicate requests for the same publication.
+            seenAlertEventIds.add(eventId);
+            requestBuzzer(eventId);
+        });
+    }
+
+    onValue(connectionRef, (snapshot) => {
+        const wasConnected = firebaseConnected;
+        connectionStatusKnown = true;
+        firebaseConnected = snapshot.val() === true;
+
+        if (!firebaseConnected) {
+            alertBaselineReady = false;
+            return;
+        }
+
+        // A newly established connection must baseline current data first.
+        // This intentionally suppresses alerts created while the Pi was offline.
+        if (!wasConnected || !alertBaselineReady) {
+            if (hasNoticeSnapshot) {
+                seedAlertEventIds(lastNoticeData);
+                alertBaselineReady = true;
+            } else {
+                alertBaselineReady = false;
+            }
+        }
+    });
+
 
     // --------------------------------------------------
     // NOTICE STATE
@@ -885,6 +996,10 @@
 
             const data =
                 snapshot.val();
+
+            // Detect only genuinely new publication events while connected.
+            // The initial/reconnect snapshot is used only to establish a baseline.
+            processAudibleAlerts(data);
 
 
             if (!data) {
