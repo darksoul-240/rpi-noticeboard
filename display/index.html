@@ -368,9 +368,20 @@
       color: var(--rust);
       letter-spacing: 0.13em;
     }
+
+    /* Presence-based idle simulation: covers the entire page without
+       stopping Firebase listeners, notice updates, or buzzer alerts. */
+    #presenceSleepScreen {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      display: none;
+      background: #000;
+    }
   </style>
 </head>
 <body>
+  <div id="presenceSleepScreen" aria-hidden="true"></div>
   <header>
     <div class="brand-lockup">
       <div class="brand-mark" aria-hidden="true">NB</div>
@@ -502,6 +513,57 @@
 
     const db =
         getDatabase(app);
+
+
+    // --------------------------------------------------
+    // PRESENCE-BASED BLACK-SCREEN SIMULATION
+    // --------------------------------------------------
+    // Firebase setting: displaySettings/mode = "alwaysOn" | "presenceBased"
+    // Local presence service (to be installed separately) exposes GET /status
+    // on 127.0.0.1:8766 and returns { "displayAwake": true/false }.
+    // This only covers the webpage; it does not switch off LCD backlight power.
+    const displayModeRef = ref(db, "displaySettings/mode");
+    const sleepScreen = document.getElementById("presenceSleepScreen");
+    let displayMode = "alwaysOn";
+    let presenceServiceAwake = false;
+
+    function updatePresenceDisplay() {
+        const shouldSleep = displayMode === "presenceBased" && !presenceServiceAwake;
+        sleepScreen.style.display = shouldSleep ? "block" : "none";
+    }
+
+    onValue(displayModeRef, (snapshot) => {
+        const value = snapshot.val();
+        // Default to Always On until a valid setting is received.
+        displayMode = value === "presenceBased" ? "presenceBased" : "alwaysOn";
+        // Switching to presence-based mode blanks immediately. The local
+        // service must report a qualified wake before the page is revealed.
+        if (displayMode === "presenceBased") {
+            presenceServiceAwake = false;
+        }
+        updatePresenceDisplay();
+    }, (error) => {
+        console.error("Could not read display mode; keeping current mode:", error);
+    });
+
+    async function refreshPresenceState() {
+        if (displayMode !== "presenceBased") return;
+        try {
+            const response = await fetch("http://127.0.0.1:8766/status", {
+                cache: "no-store"
+            });
+            if (!response.ok) return;
+            const status = await response.json();
+            presenceServiceAwake = status && status.displayAwake === true;
+            updatePresenceDisplay();
+        } catch (_) {
+            // If the sensor service is unavailable, fail safe to black while
+            // in Presence-Based mode. Always On mode is unaffected.
+        }
+    }
+
+    setInterval(refreshPresenceState, 1000);
+    refreshPresenceState();
 
 
     const noticesRef =

@@ -307,6 +307,88 @@
         line-height: 1.5;
       }
 
+      /* Display behavior settings */
+      .settings-card > h2 {
+        margin: 0 0 12px;
+        font-family: "Manrope", sans-serif;
+        font-size: 25px;
+        font-weight: 700;
+        line-height: 1.2;
+        letter-spacing: -0.04em;
+      }
+      .settings-card > h2::before {
+        content: "01 / DISPLAY BEHAVIOR";
+        display: block;
+        margin-bottom: 10px;
+        color: var(--rust);
+        font-family: "Source Sans 3", sans-serif;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.16em;
+        line-height: 1.4;
+      }
+      .settings-description {
+        margin: 0 0 20px;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.7;
+      }
+      .display-mode-options {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+      }
+      .display-mode-option {
+        display: flex;
+        align-items: flex-start;
+        gap: 11px;
+        margin: 0;
+        padding: 16px;
+        border: 1px solid var(--line);
+        background: #f5f2ea;
+        cursor: pointer;
+        letter-spacing: 0;
+        text-transform: none;
+      }
+      .display-mode-option input {
+        width: auto;
+        min-width: auto;
+        margin: 4px 0 0;
+        accent-color: var(--forest);
+        flex: 0 0 auto;
+      }
+      .display-mode-option strong {
+        display: block;
+        margin-bottom: 4px;
+        color: var(--ink);
+        font-size: 13px;
+        letter-spacing: 0;
+      }
+      .display-mode-option span {
+        display: block;
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 400;
+        line-height: 1.55;
+      }
+      .settings-actions {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 18px;
+      }
+      #displaySettingsStatus {
+        color: var(--muted);
+        font-size: 12px;
+      }
+      @media (max-width: 650px) {
+        .display-mode-options { grid-template-columns: minmax(0, 1fr); }
+        .display-mode-option { padding: 14px; }
+        .settings-actions { align-items: stretch; flex-direction: column; }
+        .settings-actions button { width: 100%; }
+      }
+
       /* Compose form */
       .compose-card { padding: clamp(23px, 4vw, 42px); }
 
@@ -322,7 +404,7 @@
       }
 
       .compose-card > h2::before {
-        content: "01 / COMPOSE A NOTICE";
+        content: "02 / COMPOSE A NOTICE";
         display: block;
         margin-bottom: 10px;
         color: var(--rust);
@@ -904,6 +986,34 @@
 
         <div id="status"></div>
 
+        <!-- DISPLAY SETTINGS -->
+        <section class="card settings-card" aria-labelledby="displaySettingsHeading">
+          <h2 id="displaySettingsHeading">Display Settings</h2>
+          <p class="settings-description">
+            Choose how the physical notice-board screen behaves. This setting is saved to Firebase and will be used by the Raspberry Pi controller.
+          </p>
+          <div class="display-mode-options" role="radiogroup" aria-label="Display mode">
+            <label class="display-mode-option" for="displayModeAlwaysOn">
+              <input type="radio" id="displayModeAlwaysOn" name="displayMode" value="alwaysOn" checked />
+              <div>
+                <strong>Always On</strong>
+                <span>The screen stays on continuously, whether or not anyone is nearby.</span>
+              </div>
+            </label>
+            <label class="display-mode-option" for="displayModePresence">
+              <input type="radio" id="displayModePresence" name="displayMode" value="presenceBased" />
+              <div>
+                <strong>Presence-Based</strong>
+                <span>The screen wakes when someone is detected nearby and sleeps after 30 seconds without detection.</span>
+              </div>
+            </label>
+          </div>
+          <div class="settings-actions">
+            <button type="button" class="primary" id="saveDisplaySettingsButton">Save Display Settings</button>
+            <span id="displaySettingsStatus" role="status" aria-live="polite">Loading saved settings…</span>
+          </div>
+        </section>
+
         <!-- CREATE / EDIT FORM -->
 
         <div class="card compose-card">
@@ -1158,7 +1268,9 @@
 
       const auth = getAuth(app);
 
-      const noticesRef = ref(db, "notices"); // --------------------------------------------------
+      const noticesRef = ref(db, "notices");
+      const displaySettingsRef = ref(db, "displaySettings");
+      // --------------------------------------------------
       // AUTHENTICATION
       // --------------------------------------------------
 
@@ -1278,6 +1390,70 @@
 
         status.style.color = success ? "#166534" : "#991b1b";
       }
+
+      // --------------------------------------------------
+      // DISPLAY SETTINGS
+      // --------------------------------------------------
+      const displayModeInputs = [...document.querySelectorAll('input[name="displayMode"]')];
+      const saveDisplaySettingsButton = document.getElementById("saveDisplaySettingsButton");
+      const displaySettingsStatus = document.getElementById("displaySettingsStatus");
+      let displaySettingsLoaded = false;
+
+      function setDisplaySettingsStatus(message, isError = false) {
+        displaySettingsStatus.textContent = message;
+        displaySettingsStatus.style.color = isError ? "#991b1b" : "var(--muted)";
+      }
+
+      function selectDisplayMode(mode) {
+        const supportedMode = mode === "presenceBased" ? "presenceBased" : "alwaysOn";
+        displayModeInputs.forEach((input) => {
+          input.checked = input.value === supportedMode;
+        });
+        return supportedMode;
+      }
+
+      onValue(
+        displaySettingsRef,
+        (snapshot) => {
+          const settings = snapshot.val() || {};
+          const mode = selectDisplayMode(settings.mode || "alwaysOn");
+          displaySettingsLoaded = true;
+          setDisplaySettingsStatus(
+            settings.mode
+              ? `Saved mode: ${mode === "presenceBased" ? "Presence-Based" : "Always On"}`
+              : "No saved mode yet — default is Always On."
+          );
+        },
+        (error) => {
+          console.error("Could not load display settings:", error);
+          setDisplaySettingsStatus("Could not load settings: " + error.message, true);
+        }
+      );
+
+      saveDisplaySettingsButton.addEventListener("click", async () => {
+        if (!displaySettingsLoaded) {
+          setDisplaySettingsStatus("Wait for the saved settings to load before saving.", true);
+          return;
+        }
+        const selectedInput = displayModeInputs.find((input) => input.checked);
+        const mode = selectedInput ? selectedInput.value : "alwaysOn";
+        saveDisplaySettingsButton.disabled = true;
+        setDisplaySettingsStatus("Saving…");
+        try {
+          await update(displaySettingsRef, {
+            mode,
+            updatedAt: Date.now(),
+          });
+          setDisplaySettingsStatus(
+            `Saved: ${mode === "presenceBased" ? "Presence-Based" : "Always On"}`
+          );
+        } catch (error) {
+          console.error("Could not save display settings:", error);
+          setDisplaySettingsStatus("Save failed: " + error.message, true);
+        } finally {
+          saveDisplaySettingsButton.disabled = false;
+        }
+      });
 
       // --------------------------------------------------
       // RESOURCES
