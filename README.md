@@ -223,6 +223,4 @@ This layout lists the main project files; additional configuration or support fi
 - The DS3231 RTC is configured on the Raspberry Pi using the `i2c-rtc,ds3231` overlay.
 - The working offline test depends on the kiosk already being open and the notice having been loaded before Wi-Fi is disconnected.
 
-## License
 
-No license is specified here. Add a license file if you want to define how others may use, modify, and distribute this project.
