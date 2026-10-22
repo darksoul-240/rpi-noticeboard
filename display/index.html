@@ -692,6 +692,24 @@
     let currentIndex = 0;
 
     let firebaseLoaded = false;
+    const NOTICE_CACHE_KEY = "smartNoticeBoard.cachedNotices.v1";
+
+    // Restore the last successful Firebase snapshot from browser storage.
+    // This keeps previously downloaded notices available during an internet
+    // outage while this kiosk page is already running.
+    try {
+        const cachedNotices = localStorage.getItem(NOTICE_CACHE_KEY);
+        if (cachedNotices) {
+            const parsed = JSON.parse(cachedNotices);
+            if (Array.isArray(parsed)) {
+                allNotices = parsed;
+                firebaseLoaded = true;
+                console.info("Restored", allNotices.length, "cached notices");
+            }
+        }
+    } catch (error) {
+        console.warn("Could not restore cached notices:", error);
+    }
 
 
     // --------------------------------------------------
@@ -1067,6 +1085,8 @@
             if (!data) {
 
                 allNotices = [];
+                try { localStorage.setItem(NOTICE_CACHE_KEY, JSON.stringify([])); }
+                catch (error) { console.warn("Could not update notice cache:", error); }
 
                 firebaseLoaded = true;
 
@@ -1091,6 +1111,12 @@
                         })
                     );
 
+            // Persist the latest confirmed Firebase snapshot locally.
+            try {
+                localStorage.setItem(NOTICE_CACHE_KEY, JSON.stringify(allNotices));
+            } catch (error) {
+                console.warn("Could not persist notice cache:", error);
+            }
 
             firebaseLoaded = true;
 
@@ -1108,24 +1134,19 @@
             console.error(error);
 
 
+            // Keep the last cached snapshot on screen if Firebase reports an
+            // error. The local system clock continues evaluating endTime.
+            if (allNotices.length > 0) {
+                firebaseLoaded = true;
+                refreshActiveNotices();
+                return;
+            }
+
             firebaseLoaded = false;
-
-
-            document.getElementById("loading")
-                .style.display = "none";
-
-
-            document.getElementById("notice")
-                .style.display = "none";
-
-
-            document.getElementById("error")
-                .style.display = "flex";
-
-
-            document.getElementById("errorTitle").textContent =
-                "Connection issue";
-
+            document.getElementById("loading").style.display = "none";
+            document.getElementById("notice").style.display = "none";
+            document.getElementById("error").style.display = "flex";
+            document.getElementById("errorTitle").textContent = "Connection issue";
             document.getElementById("errorDetail").textContent =
                 "Firebase ERROR: " + error.code + " | " + error.message;
 
